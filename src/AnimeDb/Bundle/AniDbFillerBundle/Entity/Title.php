@@ -20,8 +20,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(
  *     name="ani_db_title",
  *     indexes={
- *         @Index(name="ani_db_title_aid_idx", columns={"aid"}),
- *         @Index(name="ani_db_title_title_idx", columns={"title"})
+ *         @ORM\Index(name="ani_db_title_aid_idx", columns={"aid"}),
+ *         @ORM\Index(name="ani_db_title_title_idx", columns={"title"})
  *     }
  * )
  * @IgnoreAnnotation("ORM")
@@ -62,6 +62,7 @@ class Title
     /**
      * Aid
      *
+     * @ORM\Id
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
      *
@@ -72,6 +73,7 @@ class Title
     /**
      * Type
      *
+     * @ORM\Id
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
      * @Assert\Choice(choices = {1, 2, 3, 4}, message = "Choose a valid type.")
@@ -83,6 +85,7 @@ class Title
     /**
      * Language
      *
+     * @ORM\Id
      * @ORM\Column(type="string", length=2)
      * @Assert\NotBlank()
      * @Assert\Locale()
@@ -94,6 +97,7 @@ class Title
     /**
      * Item name
      *
+     * @ORM\Id
      * @ORM\Column(type="string", length=256)
      * @Assert\NotBlank()
      *
