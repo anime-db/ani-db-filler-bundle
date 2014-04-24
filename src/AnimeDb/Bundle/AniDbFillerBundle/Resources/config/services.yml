@@ -1,1 +1,9 @@
 services:
+    anime_db.ani_db.search:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Service\Search
+        arguments: [ %locale% ]
+        tags:
+            - { name: anime_db.search }
+        calls:
+            - [setRouter, ['@router']]
+#            - [setFiller, ['@anime_db.ani_db.filler']]
