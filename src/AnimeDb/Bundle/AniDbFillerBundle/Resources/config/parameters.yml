@@ -1,0 +1,2 @@
+parameters:
+    anime_db.ani_db.import_titles: 'http://anidb.net/api/anime-titles.dat.gz'
