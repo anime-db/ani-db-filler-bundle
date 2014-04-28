@@ -1,7 +1,7 @@
 services:
     anime_db.ani_db.search:
         class: AnimeDb\Bundle\AniDbFillerBundle\Service\Search
-        arguments: [ %locale% ]
+        arguments: [ %anime_db.ani_db.import_titles%, %kernel.cache_dir%, %locale% ]
         tags:
             - { name: anime_db.search }
         calls:

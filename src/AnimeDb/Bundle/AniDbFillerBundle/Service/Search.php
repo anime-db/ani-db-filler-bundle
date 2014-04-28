@@ -38,6 +38,20 @@ class Search extends SearchPlugin
     const TITLE = 'AniDB.net';
 
     /**
+     * Item link
+     *
+     * @var string
+     */
+    const ITEM_LINK = 'http://anidb.net/perl-bin/animedb.pl?show=anime&aid=#ID#';
+
+    /**
+     * Titeles DB
+     *
+     * @var string
+     */
+    protected $titles_db;
+
+    /**
      * Locale
      *
      * @var string
@@ -47,10 +61,13 @@ class Search extends SearchPlugin
     /**
      * Construct
      *
+     * @param string $import_titles
+     * @param string $cache_dir
      * @param string $locale
      */
-    public function __construct($locale) {
+    public function __construct($import_titles, $cache_dir, $locale) {
         $this->locale = $locale;
+        $this->titles_db = $cache_dir.'/'.pathinfo(parse_url($import_titles, PHP_URL_PATH), PATHINFO_BASENAME);
     }
 
     /**
@@ -87,7 +104,46 @@ class Search extends SearchPlugin
      */
     public function search(array $data)
     {
-        // see $data['name'];
-        return [];
+        if (!file_exists($this->titles_db)) {
+            return [];
+        }
+
+        $search = $this->getUnifiedTitle($data['name']);
+        $items = [];
+        $fp = gzopen($this->titles_db, 'r');
+        while (!gzeof($fp)) {
+            $line = trim(gzgets($fp, 4096));
+            if ($line[0] == '#') {
+                continue;
+            }
+            list($aid, $type, $lang, $title) = explode('|', $line);
+            $lang = substr($lang, 0, 2);
+            if ($lang == 'x-') {
+                continue;
+            }
+            if (mb_strpos($this->getUnifiedTitle($title), $search, 0, 'utf8') === 0) {
+                if ($type == 1 || ($type == 4 && $lang == $this->locale)) {
+                    $items[$aid] = new ItemSearch($title, str_replace('#ID#', $aid, self::ITEM_LINK), '', '');
+                } elseif (empty($titles[$aid])) {
+                    $items[$aid] = new ItemSearch($title, str_replace('#ID#', $aid, self::ITEM_LINK), '', '');
+                }
+            }
+        }
+        gzclose($fp);
+
+        return $items;
+    }
+
+    /**
+     * Get unified title
+     *
+     * @param string $title
+     * @return string
+     */
+    protected function getUnifiedTitle($title)
+    {
+        $title = mb_strtolower($title, 'utf8');
+        $title = preg_replace('/\W+/u', ' ', $title);
+        return trim($title);
     }
 }
