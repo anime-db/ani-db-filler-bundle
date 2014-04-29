@@ -53,10 +53,6 @@ class Filler extends AbstractType
                 'attr' => [
                     'placeholder' => $this->host.'/',
                 ],
-            ])
-            ->add('frames', 'checkbox', [
-                'label' => 'Upload frames',
-                'required' => false
             ]);
     }
 
