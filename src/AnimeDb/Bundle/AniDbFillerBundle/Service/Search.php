@@ -177,7 +177,7 @@ class Search extends SearchPlugin
                 $main_name,
                 $this->getLinkForFill($this->browser->getHost().str_replace('#ID#', $aid, self::ITEM_LINK)),
                 '',
-                implode("\n", $description)
+                implode("\n", array_unique($description))
             );
         }
 
