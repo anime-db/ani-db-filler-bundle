@@ -169,6 +169,7 @@ class Filler extends FillerPlugin
         // set complex data
         $this->setCover($item, $body);
         $this->setNames($item, $body);
+        $this->setEpisodes($item, $body);
         return $item;
     }
 
@@ -184,12 +185,11 @@ class Filler extends FillerPlugin
     {
         $titles = $body->filter('titles > title');
         $names = [];
-        /* @ var $title \DOMElement */
+        /* @var $title \DOMElement */
         foreach ($titles as $title) {
             $lang = substr($title->attributes->item(0)->nodeValue, 0, 2);
             if ($lang != 'x-') {
-                $title = new Crawler($title);
-                $names[$lang][$title->attr('type')] = $title->text();
+                $names[$lang][$title->getAttribute('type')] = $title->nodeValue;
             }
         }
 
@@ -238,6 +238,54 @@ class Filler extends FillerPlugin
             } catch (\Exception $e) {}
         }
         return $item;
+    }
+
+    /**
+     * Set item episodes
+     *
+     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
+     * @param \Symfony\Component\DomCrawler\Crawler $body
+     *
+     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
+     */
+    public function setEpisodes(Item $item, Crawler $body)
+    {
+        $episodes = '';
+        foreach ($body->filter('episodes > episode') as $episode) {
+            $episode = new Crawler($episode);
+            $episodes .= $episode->filter('epno')->text().'. '.$this->getEpisodeTitle($episode)."\n";
+        }
+        $item->setEpisodes(trim($episodes));
+        return $item;
+    }
+
+    /**
+     * Get episode title
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $episode
+     *
+     * @return string
+     */
+    protected function getEpisodeTitle(Crawler $episode)
+    {
+        $titles = [];
+        /* @var $title \DOMElement */
+        foreach ($episode->filter('title') as $title) {
+            $lang = substr($title->attributes->item(0)->nodeValue, 0, 2);
+            if ($lang == $this->locale) {
+                return $title->nodeValue;
+            }
+            if ($lang != 'x-') {
+                $titles[$lang] = $title->nodeValue;
+            }
+        }
+
+        // get EN lang or first
+        if (!empty($titles['en'])) {
+            return $titles['en'];
+        } else {
+            return array_shift($titles);
+        }
     }
 
     /**
