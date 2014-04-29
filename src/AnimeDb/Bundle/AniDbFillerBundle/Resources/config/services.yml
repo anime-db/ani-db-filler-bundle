@@ -6,4 +6,12 @@ services:
             - { name: anime_db.search }
         calls:
             - [setRouter, ['@router']]
-#            - [setFiller, ['@anime_db.ani_db.filler']]
+            - [setFiller, ['@anime_db.ani_db.filler']]
+
+    anime_db.ani_db.filler:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Service\Filler
+        arguments: [ @anime_db.ani_db.browser, @doctrine, @validator, %locale% ]
+        tags:
+            - { name: anime_db.filler }
+        calls:
+            - [setRouter, ['@router']]
