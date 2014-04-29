@@ -42,7 +42,14 @@ class Search extends SearchPlugin
      *
      * @var string
      */
-    const ITEM_LINK = 'http://anidb.net/perl-bin/animedb.pl?show=anime&aid=#ID#';
+    const ITEM_LINK = '/perl-bin/animedb.pl?show=anime&aid=#ID#';
+
+    /**
+     * Browser
+     *
+     * @var \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser
+     */
+    protected $browser;
 
     /**
      * Titeles DB
@@ -61,11 +68,13 @@ class Search extends SearchPlugin
     /**
      * Construct
      *
+     * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
      * @param string $import_titles
      * @param string $cache_dir
      * @param string $locale
      */
-    public function __construct($import_titles, $cache_dir, $locale) {
+    public function __construct(Browser $browser, $import_titles, $cache_dir, $locale) {
+        $this->browser = $browser;
         $this->locale = $locale;
         $this->titles_db = $cache_dir.'/'.pathinfo(parse_url($import_titles, PHP_URL_PATH), PATHINFO_BASENAME);
     }
@@ -109,7 +118,9 @@ class Search extends SearchPlugin
         }
 
         $search = $this->getUnifiedTitle($data['name']);
-        $items = [];
+
+        // search by name
+        $aids = [];
         $fp = gzopen($this->titles_db, 'r');
         while (!gzeof($fp)) {
             $line = trim(gzgets($fp, 4096));
@@ -122,14 +133,53 @@ class Search extends SearchPlugin
                 continue;
             }
             if (mb_strpos($this->getUnifiedTitle($title), $search, 0, 'utf8') === 0) {
-                if ($type == 1 || ($type == 4 && $lang == $this->locale)) {
-                    $items[$aid] = new ItemSearch($title, str_replace('#ID#', $aid, self::ITEM_LINK), '', '');
-                } elseif (empty($titles[$aid])) {
-                    $items[$aid] = new ItemSearch($title, str_replace('#ID#', $aid, self::ITEM_LINK), '', '');
+                if ($type == 1 || ($type == 4 && $lang == $this->locale) || empty($titles[$aid])) {
+                    $aids[] = $aid;
                 }
             }
         }
         gzclose($fp);
+        $aids = array_unique($aids);
+
+        // get all names for aid
+        $items = [];
+        $fp = gzopen($this->titles_db, 'r');
+        while (!gzeof($fp)) {
+            $line = trim(gzgets($fp, 4096));
+            if ($line[0] == '#') {
+                continue;
+            }
+            list($aid, $type, $lang, $title) = explode('|', $line);
+            $lang = substr($lang, 0, 2);
+            if ($lang != 'x-' && in_array($aid, $aids)) {
+                $items[$aid][$lang][$type] = $title;
+            }
+        }
+        gzclose($fp);
+
+        // build result
+        foreach ($items as $aid => $item) {
+            if (!empty($item[$this->locale])) {
+                $main_name = $this->getNameForLocale($this->locale, $item);
+            } elseif ($this->locale != 'en' && !empty($item['en'])) {
+                $main_name = $this->getNameForLocale('en', $item);
+            } else {
+                $main_name = $this->getNameForLocale(array_keys($item)[0], $item);
+            }
+            $description = [];
+            foreach ($item as $names) {
+                foreach ($names as $name) {
+                    $description[] = $name;
+                }
+            }
+            sort($description);
+            $items[$aid] = new ItemSearch(
+                $main_name,
+                $this->getLinkForFill($this->browser->getHost().str_replace('#ID#', $aid, self::ITEM_LINK)),
+                '',
+                implode("\n", $description)
+            );
+        }
 
         return $items;
     }
@@ -145,5 +195,26 @@ class Search extends SearchPlugin
         $title = mb_strtolower($title, 'utf8');
         $title = preg_replace('/\W+/u', ' ', $title);
         return trim($title);
+    }
+
+    /**
+     * Get name for locale
+     *
+     * @param string $locale
+     * @param array $names
+     * @return string
+     */
+    protected function getNameForLocale($locale, & $names)
+    {
+        if (isset($names[$locale][1])) {
+            $name = $names[$locale][1];
+            unset($names[$locale][1]);
+        } elseif (isset($names[$locale][4])) {
+            $name = $names[$locale][4];
+            unset($names[$locale][4]);
+        } else {
+            $name = array_shift($names[$locale]);
+        }
+        return $name;
     }
 }
