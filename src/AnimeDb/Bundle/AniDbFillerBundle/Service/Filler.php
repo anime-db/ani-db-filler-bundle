@@ -84,6 +84,100 @@ class Filler extends FillerPlugin
     protected $locale;
 
     /**
+     * AniDB category to genre
+     *
+     * <code>
+     *     { from: to, ... }
+     * </code>
+     *
+     * @var array
+     */
+    protected $category_to_genre = [
+        'Alternative History' => 'History',
+        'Anti-War' => 'War',
+        'Badminton' => 'Sport',
+        'Bakumatsu - Meiji Period' => 'History',
+        'Band' => 'Music',
+        'Baseball' => 'Sport',
+        'Basketball' => 'Sport',
+        'Battle Royale' => 'War',
+        'Board Games' => 'Game',
+        'Boxing' => 'Sport',
+        'Catholic School' => 'School',
+        'Chess' => 'Sport',
+        'Clubs' => 'School',
+        'College' => 'School',
+        'Combat' => 'Action',
+        'Conspiracy' => 'Thriller',
+        'Contemporary Fantasy' => 'Fantasy',
+        'Cops' => 'Police',
+        'Daily Life' => 'Slice of life',
+        'Dark Elf' => 'Fantasy',
+        'Dark Fantasy' => 'Fantasy',
+        'Dodgeball' => 'Sport',
+        'Dragon' => 'Fantasy',
+        'Edo Period' => 'Fantasy',
+        'Elementary School' => 'School',
+        'Elf' => 'Fantasy',
+        'Fairies' => 'Fantasy',
+        'Fantasy World' => 'Fantasy',
+        'Feudal Warfare' => 'War',
+        'Football' => 'Sport',
+        'Formula Racing' => 'Sport',
+        'Ghost' => 'Supernatural',
+        'Go' => 'Game',
+        'Golf' => 'Sport',
+        'Gunfights' => 'War',
+        'Gymnastics' => 'Sport',
+        'Heian Period' => 'History',
+        'High Fantasy' => 'Fantasy',
+        'High School' => 'School',
+        'Historical' => 'History',
+        'Ice Skating' => 'Sport',
+        'Inline Skating' => 'Sport',
+        'Jousting' => 'Sport',
+        'Judo' => 'Sport',
+        'Kendo' => 'Sport',
+        'Law and Order' => 'Police',
+        'Magic Circles' => 'Magic',
+        'Mahjong' => 'Game',
+        'Mahou Shoujo' => 'Mahoe shoujo',
+        'Martial Arts' => 'Martial arts',
+        'Military' => 'War',
+        'Motorsport' => 'Sport',
+        'Muay Thai' => 'Sport',
+        'Ninja' => 'Samurai',
+        'Pirate' => 'Adventure',
+        'Post-apocalypse' => 'Apocalyptic fiction',
+        'Post-War' => 'War',
+        'Proxy Battles' => 'War',
+        'Reverse Harem' => 'Harem',
+        'Rugby' => 'Sport',
+        'School Dormitory' => 'School',
+        'School Excursion' => 'School',
+        'School Festival' => 'School',
+        'School Life' => 'School',
+        'School Sports Festival' => 'School',
+        'Sci-Fi' => 'Sci-fi',
+        'Sengoku Period' => 'History',
+        'Shougi' => 'Game',
+        'Shoujo Ai' => 'Shoujo-ai',
+        'Shounen Ai' => 'Shounen-ai',
+        'Spellcasting' => 'Magic',
+        'Sports' => 'Sport',
+        'Street Racing' => 'Cars',
+        'Swimming' => 'Sport',
+        'Swordplay' => 'Sport',
+        'Tennis' => 'Sport',
+        'Victorian Period' => 'History',
+        'Volleyball' => 'Sport',
+        'Witch' => 'Magic',
+        'World War I' => 'War',
+        'World War II' => 'War',
+        'Wrestling' => 'Action',
+    ];
+
+    /**
      * Construct
      *
      * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
@@ -170,6 +264,7 @@ class Filler extends FillerPlugin
         $this->setCover($item, $body);
         $this->setNames($item, $body);
         $this->setEpisodes($item, $body);
+        $this->setGenres($item, $body);
         return $item;
     }
 
@@ -286,6 +381,31 @@ class Filler extends FillerPlugin
         } else {
             return array_shift($titles);
         }
+    }
+
+    /**
+     * Set item genres
+     *
+     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
+     * @param \Symfony\Component\DomCrawler\Crawler $body
+     *
+     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
+     */
+    public function setGenres(Item $item, Crawler $body)
+    {
+        $repository = $this->doctrine->getRepository('AnimeDbCatalogBundle:Genre');
+        $categories = $body->filter('categories > category > name');
+        foreach ($categories as $category) {
+            if (isset($this->category_to_genre[$category->nodeValue])) {
+                $genre = $repository->findOneByName($this->category_to_genre[$category->nodeValue]);
+            } else {
+                $genre = $repository->findOneByName($category->nodeValue);
+            }
+            if ($genre instanceof Genre) {
+                $item->addGenre($genre);
+            }
+        }
+        return $item;
     }
 
     /**
