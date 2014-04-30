@@ -264,6 +264,7 @@ class Filler extends FillerPlugin
         $this->setCover($item, $body);
         $this->setNames($item, $body);
         $this->setEpisodes($item, $body);
+        $this->setType($item, $body);
         $this->setGenres($item, $body);
         return $item;
     }
@@ -381,6 +382,26 @@ class Filler extends FillerPlugin
         } else {
             return array_shift($titles);
         }
+    }
+
+    /**
+     * Set item type
+     *
+     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
+     * @param \Symfony\Component\DomCrawler\Crawler $body
+     *
+     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
+     */
+    public function setType(Item $item, Crawler $body)
+    {
+        $rename = [
+            'TV Series' => 'TV',
+            'Movie' => 'Feature',
+            'Web' => 'ONA',
+        ];
+        $type = $body->filter('anime > type')->text();
+        $type = isset($rename[$type]) ? $rename[$type] : $type;
+        return $item->setType($this->doctrine->getRepository('AnimeDbCatalogBundle:Type')->findOneByName($type));
     }
 
     /**
