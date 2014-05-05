@@ -1,1 +1,23 @@
 services:
+    anime_db.ani_db.search:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Service\Search
+        arguments: [ @anime_db.ani_db.browser, %anime_db.ani_db.import_titles%, %kernel.cache_dir%, %locale% ]
+        tags:
+            - { name: anime_db.search }
+        calls:
+            - [setRouter, ['@router']]
+            - [setFiller, ['@anime_db.ani_db.filler']]
+
+    anime_db.ani_db.filler:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Service\Filler
+        arguments: [ @anime_db.ani_db.browser, @doctrine, @validator, %locale% ]
+        tags:
+            - { name: anime_db.filler }
+        calls:
+            - [setRouter, ['@router']]
+
+    anime_db.ani_db.refiller:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller
+        arguments: [ @anime_db.ani_db.browser, @anime_db.ani_db.filler, @anime_db.ani_db.search ]
+        tags:
+            - { name: anime_db.refiller }
