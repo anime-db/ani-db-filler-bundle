@@ -15,3 +15,9 @@ services:
             - { name: anime_db.filler }
         calls:
             - [setRouter, ['@router']]
+
+    anime_db.ani_db.refiller:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller
+        arguments: [ @anime_db.ani_db.browser, @anime_db.ani_db.filler, @anime_db.ani_db.search ]
+        tags:
+            - { name: anime_db.refiller }
