@@ -59,6 +59,13 @@ class Search extends SearchPlugin
     protected $titles_db;
 
     /**
+     * Titeles import
+     *
+     * @var string
+     */
+    protected $titles_import;
+
+    /**
      * Locale
      *
      * @var string
@@ -69,14 +76,15 @@ class Search extends SearchPlugin
      * Construct
      *
      * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
-     * @param string $import_titles
+     * @param string $titles_import
      * @param string $cache_dir
      * @param string $locale
      */
-    public function __construct(Browser $browser, $import_titles, $cache_dir, $locale) {
+    public function __construct(Browser $browser, $titles_import, $cache_dir, $locale) {
         $this->browser = $browser;
         $this->locale = $locale;
-        $this->titles_db = $cache_dir.'/'.pathinfo(parse_url($import_titles, PHP_URL_PATH), PATHINFO_BASENAME);
+        $this->titles_import = $titles_import;
+        $this->titles_db = $cache_dir.'/'.pathinfo(parse_url($titles_import, PHP_URL_PATH), PATHINFO_BASENAME);
     }
 
     /**
@@ -113,7 +121,7 @@ class Search extends SearchPlugin
      */
     public function search(array $data)
     {
-        if (!file_exists($this->titles_db)) {
+        if (!file_exists($this->titles_db) && @!copy($this->titles_import, $this->titles_db)) {
             return [];
         }
 
