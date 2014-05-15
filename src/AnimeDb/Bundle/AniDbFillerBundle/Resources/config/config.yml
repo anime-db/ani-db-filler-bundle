@@ -1,0 +1,6 @@
+assetic:
+    bundles: [ AnimeDbAniDbFillerBundle ]
+    assets:
+        stylesheets:
+            inputs:
+                - @AnimeDbAniDbFillerBundle/Resources/public/css/plugin.css
