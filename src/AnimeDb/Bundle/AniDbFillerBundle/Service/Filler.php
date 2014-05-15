@@ -24,6 +24,7 @@ use AnimeDb\Bundle\CatalogBundle\Entity\Image;
 use AnimeDb\Bundle\AppBundle\Entity\Field\Image as ImageField;
 use AnimeDb\Bundle\AniDbFillerBundle\Form\Filler as FillerForm;
 use Symfony\Component\DomCrawler\Crawler;
+use Knp\Menu\ItemInterface;
 
 /**
  * Search from site AniDB.net
@@ -223,6 +224,21 @@ class Filler extends FillerPlugin
     public function getForm()
     {
         return new FillerForm($this->browser->getHost());
+    }
+
+    /**
+     * Build menu for plugin
+     *
+     * @param \Knp\Menu\ItemInterface $item
+     *
+     * @return \Knp\Menu\ItemInterface
+     */
+    public function buildMenu(ItemInterface $item)
+    {
+        $item->addChild($this->getTitle(), [
+            'route' => 'fill_filler',
+            'routeParameters' => ['plugin' => $this->getName()]
+        ])->setLinkAttribute('class', 'icon-label icon-label-plugin-anidb');
     }
 
     /**

@@ -13,6 +13,7 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Search\Search as SearchPlugin;
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Search\Item as ItemSearch;
 use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
+use Knp\Menu\ItemInterface;
 
 /**
  * Search from site AniDB.net
@@ -103,6 +104,21 @@ class Search extends SearchPlugin
      */
     public function getTitle() {
         return self::TITLE;
+    }
+
+    /**
+     * Build menu for plugin
+     *
+     * @param \Knp\Menu\ItemInterface $item
+     *
+     * @return \Knp\Menu\ItemInterface
+     */
+    public function buildMenu(ItemInterface $item)
+    {
+        $item->addChild($this->getTitle(), [
+            'route' => 'fill_filler',
+            'routeParameters' => ['plugin' => $this->getName()]
+        ])->setLinkAttribute('class', 'icon-label icon-label-plugin-anidb');
     }
 
     /**
