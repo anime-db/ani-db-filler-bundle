@@ -11,7 +11,8 @@
 namespace AnimeDb\Bundle\AniDbFillerBundle\Event\Listener;
 
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\Process;
 
 /**
  * Update the titles db on clear cache
@@ -28,8 +29,22 @@ class Console
      */
     public function onTerminate(ConsoleTerminateEvent $event)
     {
-        if ($event->getExitCode() === 0 && $event->getCommand()->getName() == 'cache:clear') {
-            // TODO do update db
+        if ($event->getCommand()->getName() == 'cache:clear') {
+            $cmd = 'animedb:update-titles';
+
+            $phpFinder = new PhpExecutableFinder();
+            if (!($phpPath = $phpFinder->find())) {
+                throw new \RuntimeException('The php executable could not be found, add it to your PATH environment variable and try again');
+            }
+
+            $php = escapeshellarg($phpPath);
+            $process = new Process($php.' app/console '.$cmd, __DIR__.'/../../../../../../../../../', null, null, 1500);
+            $process->run(function ($type, $buffer) {
+                echo $buffer;
+            });
+            if (!$process->isSuccessful()) {
+                throw new \RuntimeException(sprintf('An error occurred when executing the "%s" command.', $cmd));
+            }
         }
     }
 }
