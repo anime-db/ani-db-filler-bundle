@@ -21,3 +21,8 @@ services:
         arguments: [ @anime_db.ani_db.browser, @anime_db.ani_db.filler, @anime_db.ani_db.search ]
         tags:
             - { name: anime_db.refiller }
+
+    anime_db.ani_db.listener.console:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Event\Listener\Console
+        tags:
+            - { name: kernel.event_listener, event: console.terminate, method: onTerminate }
