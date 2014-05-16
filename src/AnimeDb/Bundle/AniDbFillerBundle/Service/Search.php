@@ -115,10 +115,8 @@ class Search extends SearchPlugin
      */
     public function buildMenu(ItemInterface $item)
     {
-        $item->addChild($this->getTitle(), [
-            'route' => 'fill_filler',
-            'routeParameters' => ['plugin' => $this->getName()]
-        ])->setLinkAttribute('class', 'icon-label icon-label-plugin-anidb');
+        return parent::buildMenu($item)
+            ->setLinkAttribute('class', 'icon-label icon-label-plugin-anidb');
     }
 
     /**
