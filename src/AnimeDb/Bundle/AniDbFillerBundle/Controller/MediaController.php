@@ -30,7 +30,7 @@ class MediaController extends Controller
     const CACHE_LIFETIME = 15552000;
 
     /**
-     * Get cover from ani-db item id
+     * Get cover from anidb.net item id
      *
      * @param string $id
      * @param \Symfony\Component\HttpFoundation\Request $request
@@ -41,9 +41,6 @@ class MediaController extends Controller
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'image/jpeg');
-        $response->setMaxAge(self::CACHE_LIFETIME);
-        $response->setSharedMaxAge(self::CACHE_LIFETIME);
-        $response->setExpires((new \DateTime())->modify('+'.self::CACHE_LIFETIME.' seconds'));
         // caching
         if ($last_update = $this->container->getParameter('last_update')) {
             $response->setLastModified(new \DateTime($last_update));
@@ -62,6 +59,10 @@ class MediaController extends Controller
         if ($image = $body->filter('picture')->text()) {
             $image = $this->get('anime_db.ani_db.browser')->getImageUrl($image);
             $response->setContent(file_get_contents($image));
+            // set lifetime
+            $response->setMaxAge(self::CACHE_LIFETIME);
+            $response->setSharedMaxAge(self::CACHE_LIFETIME);
+            $response->setExpires((new \DateTime())->modify('+'.self::CACHE_LIFETIME.' seconds'));
         } else {
             throw $this->createNotFoundException('Cover not found');
         }
