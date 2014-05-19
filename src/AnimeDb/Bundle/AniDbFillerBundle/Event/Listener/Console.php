@@ -30,7 +30,8 @@ class Console
     public function onTerminate(ConsoleTerminateEvent $event)
     {
         if ($event->getCommand()->getName() == 'cache:clear') {
-            $cmd = 'animedb:update-titles';
+            $env = ltrim($event->getInput()->getOption('env'), '=');
+            $cmd = 'animedb:update-titles -e='.$env;
 
             $phpFinder = new PhpExecutableFinder();
             if (!($phpPath = $phpFinder->find())) {
