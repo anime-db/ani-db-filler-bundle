@@ -180,7 +180,7 @@ class Search extends SearchPlugin
             $items[$aid] = new ItemSearch(
                 $main_name,
                 $this->getLinkForFill($this->browser->getHost().str_replace('#ID#', $aid, self::ITEM_LINK)),
-                '',
+                $this->router->generate('ani_db_media_cover', ['id' => $aid]),
                 implode("\n", array_unique($description))
             );
         }
