@@ -58,7 +58,17 @@ class MediaController extends Controller
 
         if ($image = $body->filter('picture')->text()) {
             $image = $this->get('anime_db.ani_db.browser')->getImageUrl($image);
-            $response->setContent(file_get_contents($image));
+            // add app code in request
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'GET',
+                    'header' => 'User-Agent: '.$this->container->getParameter('anime_db.ani_db.app_code')."\r\n"
+                ]
+            ]);
+            if (!($content = @file_get_contents($image, false, $context))) {
+                throw new \RuntimeException('Failed download image from anidb.net');
+            }
+            $response->setContent($content);
             // set lifetime
             $response->setMaxAge(self::CACHE_LIFETIME);
             $response->setSharedMaxAge(self::CACHE_LIFETIME);
