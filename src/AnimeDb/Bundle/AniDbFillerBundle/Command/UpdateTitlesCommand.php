@@ -46,17 +46,22 @@ class UpdateTitlesCommand extends ContainerAwareCommand
      * @see Symfony\Component\Console\Command.Command::execute()
      */
     protected function execute(InputInterface $input, OutputInterface $output) {
-        $cache_dir = $this->getContainer()->getParameter('kernel.cache_dir').'/';
-        $url = $this->getContainer()->getParameter('anime_db.ani_db.import_titles');
-        $file = $cache_dir.pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
-        $file_csv = $cache_dir.$this->getContainer()->getParameter('anime_db.ani_db.titles_db');
+        $now = time();
+        $file_csv = $this->getContainer()->getParameter('kernel.cache_dir').'/'.
+            $this->getContainer()->getParameter('anime_db.ani_db.titles_db');
 
-        // download db if need
-        if (!file_exists($file) || filemtime($file)+self::CACHE_LIFE_TIME < time()) {
-            if (@!copy($url, $file)) {
-                throw new \RuntimeException('Failed to download the titles database');
+        if (!file_exists($file_csv) || filemtime($file_csv)+self::CACHE_LIFE_TIME < $now) {
+
+            // download the original db if need and cache it in system temp dir
+            $url = $this->getContainer()->getParameter('anime_db.ani_db.import_titles');
+            $file = sys_get_temp_dir().'/'.pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
+            if (!file_exists($file) || filemtime($file)+self::CACHE_LIFE_TIME < $now) {
+                if (@!copy($url, $file)) {
+                    throw new \RuntimeException('Failed to download the titles database');
+                }
+                $output->writeln('The titles database is loaded');
             }
-            $output->writeln('The titles database is loaded');
+
             $output->writeln('Start assembling database');
 
             // clear list titles and add unified title
@@ -78,7 +83,8 @@ class UpdateTitlesCommand extends ContainerAwareCommand
             }
             gzclose($fp);
             gzclose($fp_csv);
-            unlink($file);
+            touch($file, $now);
+            touch($file_csv, $now);
 
             $output->writeln('The titles database is updated');
         } else {
