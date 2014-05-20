@@ -1,7 +1,7 @@
 services:
     anime_db.ani_db.search:
         class: AnimeDb\Bundle\AniDbFillerBundle\Service\Search
-        arguments: [ @anime_db.ani_db.browser, %anime_db.ani_db.import_titles%, %kernel.cache_dir%, %locale% ]
+        arguments: [ @anime_db.ani_db.browser, %anime_db.ani_db.titles_db%, %kernel.cache_dir%, %locale% ]
         tags:
             - { name: anime_db.search }
         calls:
@@ -21,3 +21,8 @@ services:
         arguments: [ @anime_db.ani_db.browser, @anime_db.ani_db.filler, @anime_db.ani_db.search ]
         tags:
             - { name: anime_db.refiller }
+
+    anime_db.ani_db.listener.console:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Event\Listener\Console
+        tags:
+            - { name: kernel.event_listener, event: console.terminate, method: onTerminate }

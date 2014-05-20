@@ -60,13 +60,6 @@ class Search extends SearchPlugin
     protected $titles_db;
 
     /**
-     * Titeles import
-     *
-     * @var string
-     */
-    protected $titles_import;
-
-    /**
      * Locale
      *
      * @var string
@@ -77,15 +70,14 @@ class Search extends SearchPlugin
      * Construct
      *
      * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
-     * @param string $titles_import
+     * @param string $titles_db
      * @param string $cache_dir
      * @param string $locale
      */
-    public function __construct(Browser $browser, $titles_import, $cache_dir, $locale) {
+    public function __construct(Browser $browser, $titles_db, $cache_dir, $locale) {
         $this->browser = $browser;
         $this->locale = $locale;
-        $this->titles_import = $titles_import;
-        $this->titles_db = $cache_dir.'/'.pathinfo(parse_url($titles_import, PHP_URL_PATH), PATHINFO_BASENAME);
+        $this->titles_db = $cache_dir.'/'.$titles_db;
     }
 
     /**
@@ -135,7 +127,8 @@ class Search extends SearchPlugin
      */
     public function search(array $data)
     {
-        if (!file_exists($this->titles_db) && @!copy($this->titles_import, $this->titles_db)) {
+        // if the db does not exists, send a request to download
+        if (!file_exists($this->titles_db)) {
             return [];
         }
 
@@ -146,15 +139,8 @@ class Search extends SearchPlugin
         $fp = gzopen($this->titles_db, 'r');
         while (!gzeof($fp)) {
             $line = trim(gzgets($fp, 4096));
-            if ($line[0] == '#') {
-                continue;
-            }
-            list($aid, $type, $lang, $title) = explode('|', $line);
-            $lang = substr($lang, 0, 2);
-            if ($lang == 'x-') {
-                continue;
-            }
-            if (mb_strpos($this->getUnifiedTitle($title), $search, 0, 'utf8') === 0) {
+            list($aid, $type, $lang, $unified, ) = explode('|', $line);
+            if (mb_strpos($unified, $search, 0, 'utf8') === 0) {
                 if ($type == 1 || ($type == 4 && $lang == $this->locale) || empty($titles[$aid])) {
                     $aids[] = $aid;
                 }
@@ -168,12 +154,8 @@ class Search extends SearchPlugin
         $fp = gzopen($this->titles_db, 'r');
         while (!gzeof($fp)) {
             $line = trim(gzgets($fp, 4096));
-            if ($line[0] == '#') {
-                continue;
-            }
-            list($aid, $type, $lang, $title) = explode('|', $line);
-            $lang = substr($lang, 0, 2);
-            if ($lang != 'x-' && in_array($aid, $aids)) {
+            list($aid, $type, $lang, , $title) = explode('|', $line);
+            if (in_array($aid, $aids)) {
                 $items[$aid][$lang][$type] = $title;
             }
         }
@@ -198,7 +180,7 @@ class Search extends SearchPlugin
             $items[$aid] = new ItemSearch(
                 $main_name,
                 $this->getLinkForFill($this->browser->getHost().str_replace('#ID#', $aid, self::ITEM_LINK)),
-                '',
+                $this->router->generate('ani_db_media_cover', ['id' => $aid]),
                 implode("\n", array_unique($description))
             );
         }

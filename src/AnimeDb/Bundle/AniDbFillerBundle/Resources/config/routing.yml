@@ -1,0 +1,5 @@
+ani_db_media_cover:
+    pattern:  /media/ani-db/{id}/cover.jpg
+    defaults: { _controller: AnimeDbAniDbFillerBundle:Media:cover }
+    requirements:
+        id:  \d+

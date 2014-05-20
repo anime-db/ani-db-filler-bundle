@@ -1,2 +1,3 @@
 parameters:
     anime_db.ani_db.import_titles: 'http://anidb.net/api/anime-titles.dat.gz'
+    anime_db.ani_db.titles_db: 'anime-titles.csv.gz'
