@@ -275,7 +275,7 @@ class Filler extends FillerPlugin
         $item->addSource($source);
 
         // set complex data
-        $this->setCover($item, $body);
+        $this->setCover($item, $body, $match['id']);
         $this->setNames($item, $body);
         $this->setEpisodes($item, $body);
         $this->setType($item, $body);
@@ -334,17 +334,17 @@ class Filler extends FillerPlugin
      *
      * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
      * @param \Symfony\Component\DomCrawler\Crawler $body
+     * @param integer $id
      *
      * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
      */
-    public function setCover(Item $item, Crawler $body)
+    public function setCover(Item $item, Crawler $body, $id)
     {
         if ($image = $body->filter('picture')->text()) {
             try {
                 $image = $this->browser->getImageUrl($image);
                 $ext = pathinfo(parse_url($image, PHP_URL_PATH), PATHINFO_EXTENSION);
-                $target = self::NAME.'/'.$body->filterXPath('//@id')->text().'/cover.'.$ext;
-                $item->setCover($this->uploadImage($image, $target));
+                $item->setCover($this->uploadImage($image, self::NAME.'/'.$id.'/cover.'.$ext));
             } catch (\Exception $e) {}
         }
         return $item;
