@@ -273,7 +273,13 @@ class Refiller extends RefillerPlugin
         // can refill from source. not need search
         if ($url) {
             return [
-                new ItemRefiller($item->getName(), ['url' => $url], $item->getSummary())
+                new ItemRefiller(
+                    $item->getName(),
+                    ['url' => $url],
+                    $url,
+                    $item->getCover(),
+                    $item->getSummary()
+                )
             ];
         }
 
@@ -294,7 +300,13 @@ class Refiller extends RefillerPlugin
             foreach ($result as $key => $item) {
                 parse_str(parse_url($item->getLink(), PHP_URL_QUERY), $query);
                 $link = array_values($query)[0]['url'];
-                $result[$key] = new ItemRefiller($item->getName(), ['url' => $link], $link);
+                $result[$key] = new ItemRefiller(
+                    $item->getName(),
+                    ['url' => $link],
+                    $link,
+                    $item->getImage(),
+                    $item->getDescription()
+                );
             }
         }
 
