@@ -341,8 +341,10 @@ class Filler extends FillerPlugin
         if ($image = $body->filter('picture')->text()) {
             try {
                 $image = $this->browser->getImageUrl($image);
-                $ext = pathinfo(parse_url($image, PHP_URL_PATH), PATHINFO_EXTENSION);
-                $item->setCover($this->uploadImage($image, self::NAME.'/'.$id.'/cover.'.$ext));
+                if ($path = parse_url($image, PHP_URL_PATH)) {
+                    $ext = pathinfo($path, PATHINFO_EXTENSION);
+                    $item->setCover($this->uploadImage($image, self::NAME.'/'.$id.'/cover.'.$ext));
+                }
             } catch (\Exception $e) {}
         }
         return $item;
