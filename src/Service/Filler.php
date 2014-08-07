@@ -345,7 +345,7 @@ class Filler extends FillerPlugin
                     $ext = pathinfo($path, PATHINFO_EXTENSION);
                     $item->setCover($this->uploadImage($image, self::NAME.'/'.$id.'/cover.'.$ext));
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {} // error while retrieving images is not critical
         }
         return $item;
     }
