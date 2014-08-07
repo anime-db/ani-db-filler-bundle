@@ -52,7 +52,10 @@ class UpdateTitlesCommand extends ContainerAwareCommand
 
             // download the original db if need and cache it in system temp dir
             $url = $this->getContainer()->getParameter('anime_db.ani_db.import_titles');
-            $file = sys_get_temp_dir().'/'.pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
+            if (($path = parse_url($url, PHP_URL_PATH)) === false) {
+                throw new \InvalidArgumentException('Failed parse URL: '.$url);
+            }
+            $file = sys_get_temp_dir().'/'.pathinfo($path, PATHINFO_BASENAME);
             if (!file_exists($file) || filemtime($file)+self::CACHE_LIFE_TIME < $now) {
                 // add app code in request
                 $app_code = $this->getContainer()->getParameter('anime_db.ani_db.app_code');
