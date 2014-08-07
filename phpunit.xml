@@ -9,12 +9,12 @@
          processIsolation="false"
          stopOnFailure="false"
          syntaxCheck="false"
-         bootstrap="bootstrap.php"
+         bootstrap="tests/bootstrap.php"
 >
 
     <testsuites>
         <testsuite name="AniDbFillerBundle Test Suite">
-            <directory>./src/*/Bundle/*Bundle/Tests</directory>
+            <directory>./tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>
