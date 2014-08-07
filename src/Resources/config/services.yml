@@ -24,5 +24,6 @@ services:
 
     anime_db.ani_db.listener.console:
         class: AnimeDb\Bundle\AniDbFillerBundle\Event\Listener\Console
+        arguments: [ %kernel.root_dir'% ]
         tags:
             - { name: kernel.event_listener, event: console.terminate, method: onTerminate }

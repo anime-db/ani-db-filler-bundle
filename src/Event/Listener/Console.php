@@ -23,6 +23,23 @@ use Symfony\Component\Process\Process;
 class Console
 {
     /**
+     * Root dir
+     *
+     * @var string
+     */
+    protected $root_dir;
+
+    /**
+     * Construct
+     *
+     * @param string $root_dir
+     */
+    public function __construct($root_dir)
+    {
+        $this->root_dir = $root_dir;
+    }
+
+    /**
      * On Terminate command
      *
      * @param \Symfony\Component\Console\Event\ConsoleTerminateEvent $event
@@ -39,7 +56,7 @@ class Console
             }
 
             $php = escapeshellarg($phpPath);
-            $process = new Process($php.' app/console '.$cmd, __DIR__.'/../../../../../../', null, null, 1500);
+            $process = new Process($php.' app/console '.$cmd, $this->root_dir.'/../', null, null, 1500);
             $process->run(function ($type, $buffer) {
                 echo $buffer;
             });
