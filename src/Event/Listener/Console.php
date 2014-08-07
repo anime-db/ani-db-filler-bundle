@@ -39,7 +39,7 @@ class Console
             }
 
             $php = escapeshellarg($phpPath);
-            $process = new Process($php.' app/console '.$cmd, __DIR__.'/../../../../../../../../../', null, null, 1500);
+            $process = new Process($php.' app/console '.$cmd, __DIR__.'/../../../../../../', null, null, 1500);
             $process->run(function ($type, $buffer) {
                 echo $buffer;
             });
