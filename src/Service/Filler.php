@@ -217,7 +217,7 @@ class Filler extends FillerPlugin
     /**
      * Get form
      *
-     * @return \AnimeDb\Bundle\ShikimoriFillerBundle\Form\Filler
+     * @return \AnimeDb\Bundle\AniDbFillerBundle\Form\Filler
      */
     public function getForm()
     {
