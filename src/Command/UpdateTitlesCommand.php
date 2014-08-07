@@ -13,8 +13,6 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Doctrine\ORM\Tools\SchemaTool;
-use Doctrine\ORM\EntityManager;
 
 /**
  * Update list of titles from AniDB.net

@@ -12,7 +12,6 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
  * Get item from filler
@@ -22,7 +21,6 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
  */
 class Filler extends AbstractType
 {
-
     /**
      * HTTP host
      *
