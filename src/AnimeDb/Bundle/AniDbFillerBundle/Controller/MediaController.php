@@ -41,6 +41,10 @@ class MediaController extends Controller
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'image/jpeg');
+        // set lifetime
+        $response->setMaxAge(self::CACHE_LIFETIME);
+        $response->setSharedMaxAge(self::CACHE_LIFETIME);
+        $response->setExpires((new \DateTime())->modify('+'.self::CACHE_LIFETIME.' seconds'));
         // caching
         if ($last_update = $this->container->getParameter('last_update')) {
             $response->setLastModified(new \DateTime($last_update));
@@ -69,10 +73,6 @@ class MediaController extends Controller
                 throw new \RuntimeException('Failed download image from anidb.net');
             }
             $response->setContent($content);
-            // set lifetime
-            $response->setMaxAge(self::CACHE_LIFETIME);
-            $response->setSharedMaxAge(self::CACHE_LIFETIME);
-            $response->setExpires((new \DateTime())->modify('+'.self::CACHE_LIFETIME.' seconds'));
         } else {
             throw $this->createNotFoundException('Cover not found');
         }
