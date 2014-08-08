@@ -2,7 +2,7 @@
 
 [![Latest Stable Version](https://poser.pugx.org/anime-db/ani-db-filler-bundle/v/stable.png)](https://packagist.org/packages/anime-db/ani-db-filler-bundle)
 [![Latest Unstable Version](https://poser.pugx.org/anime-db/ani-db-filler-bundle/v/unstable.png)](https://packagist.org/packages/anime-db/ani-db-filler-bundle)
-[![Build Status](https://travis-ci.org/anime-db/ani-db-filler-bundle.png)](https://travis-ci.org/anime-db/ani-db-filler-bundle)
+[![Build Status](https://travis-ci.org/anime-db/ani-db-filler-bundle.svg?branch=master)](https://travis-ci.org/anime-db/ani-db-filler-bundle)
 [![Total Downloads](https://poser.pugx.org/anime-db/ani-db-filler-bundle/downloads.png)](https://packagist.org/packages/anime-db/ani-db-filler-bundle)
 [![License](https://poser.pugx.org/anime-db/ani-db-filler-bundle/license.png)](https://packagist.org/packages/anime-db/ani-db-filler-bundle)
 [![Code Coverage](https://scrutinizer-ci.com/g/anime-db/ani-db-filler-bundle/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/anime-db/ani-db-filler-bundle/?branch=master)
