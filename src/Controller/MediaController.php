@@ -41,6 +41,10 @@ class MediaController extends Controller
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'image/jpeg');
+        // set lifetime
+        $response->setMaxAge(self::CACHE_LIFETIME);
+        $response->setSharedMaxAge(self::CACHE_LIFETIME);
+        $response->setExpires((new \DateTime())->modify('+'.self::CACHE_LIFETIME.' seconds'));
         // caching
         if ($last_update = $this->container->getParameter('last_update')) {
             $response->setLastModified(new \DateTime($last_update));
@@ -58,21 +62,10 @@ class MediaController extends Controller
 
         if ($image = $body->filter('picture')->text()) {
             $image = $this->get('anime_db.ani_db.browser')->getImageUrl($image);
-            // add app code in request
-            $context = stream_context_create([
-                'http' => [
-                    'method' => 'GET',
-                    'header' => 'User-Agent: '.$this->container->getParameter('anime_db.ani_db.app_code')."\r\n"
-                ]
-            ]);
-            if (!($content = @file_get_contents($image, false, $context))) {
+            if (!($content = @file_get_contents($image, false))) {
                 throw new \RuntimeException('Failed download image from anidb.net');
             }
             $response->setContent($content);
-            // set lifetime
-            $response->setMaxAge(self::CACHE_LIFETIME);
-            $response->setSharedMaxAge(self::CACHE_LIFETIME);
-            $response->setExpires((new \DateTime())->modify('+'.self::CACHE_LIFETIME.' seconds'));
         } else {
             throw $this->createNotFoundException('Cover not found');
         }

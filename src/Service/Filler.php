@@ -13,14 +13,12 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Filler\Filler as FillerPlugin;
 use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Symfony\Component\Validator\Validator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use AnimeDb\Bundle\CatalogBundle\Entity\Item;
 use AnimeDb\Bundle\CatalogBundle\Entity\Name;
 use AnimeDb\Bundle\CatalogBundle\Entity\Source;
 use AnimeDb\Bundle\CatalogBundle\Entity\Type;
 use AnimeDb\Bundle\CatalogBundle\Entity\Genre;
-use AnimeDb\Bundle\CatalogBundle\Entity\Studio;
-use AnimeDb\Bundle\CatalogBundle\Entity\Image;
 use AnimeDb\Bundle\AppBundle\Entity\Field\Image as ImageField;
 use AnimeDb\Bundle\AniDbFillerBundle\Form\Filler as FillerForm;
 use Symfony\Component\DomCrawler\Crawler;
@@ -73,7 +71,7 @@ class Filler extends FillerPlugin
     /**
      * Validator
      *
-     * @var \Symfony\Component\Validator\Validator
+     * @var \Symfony\Component\Validator\Validator\ValidatorInterface
      */
     private $validator;
 
@@ -183,13 +181,13 @@ class Filler extends FillerPlugin
      *
      * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
      * @param \Doctrine\Bundle\DoctrineBundle\Registry $doctrine
-     * @param \Symfony\Component\Validator\Validator $validator
+     * @param \Symfony\Component\Validator\Validator\ValidatorInterface $validator
      * @param string $locale
      */
     public function __construct(
         Browser $browser,
         Registry $doctrine,
-        Validator $validator,
+        ValidatorInterface $validator,
         $locale
     ) {
         $this->browser = $browser;
@@ -219,7 +217,7 @@ class Filler extends FillerPlugin
     /**
      * Get form
      *
-     * @return \AnimeDb\Bundle\ShikimoriFillerBundle\Form\Filler
+     * @return \AnimeDb\Bundle\AniDbFillerBundle\Form\Filler
      */
     public function getForm()
     {
@@ -242,7 +240,7 @@ class Filler extends FillerPlugin
     /**
      * Fill item from source
      *
-     * @param array $date
+     * @param array $data
      *
      * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item|null
      */
@@ -343,9 +341,11 @@ class Filler extends FillerPlugin
         if ($image = $body->filter('picture')->text()) {
             try {
                 $image = $this->browser->getImageUrl($image);
-                $ext = pathinfo(parse_url($image, PHP_URL_PATH), PATHINFO_EXTENSION);
-                $item->setCover($this->uploadImage($image, self::NAME.'/'.$id.'/cover.'.$ext));
-            } catch (\Exception $e) {}
+                if ($path = parse_url($image, PHP_URL_PATH)) {
+                    $ext = pathinfo($path, PATHINFO_EXTENSION);
+                    $item->setCover($this->uploadImage($image, self::NAME.'/'.$id.'/cover.'.$ext));
+                }
+            } catch (\Exception $e) {} // error while retrieving images is not critical
         }
         return $item;
     }
