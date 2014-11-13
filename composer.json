@@ -1,20 +1,20 @@
 {
-    "name": "anime-db/ani-db-filler-bundle",
-    "license": "GPL-3.0",
-    "type": "anime-db-plugin",
-    "description": "Plugin AniDB for the catalog Anime DB",
-    "homepage": "http://github.com/anime-db/ani-db-filler-bundle",
-    "version": "0.1.7",
-    "autoload": {
-        "psr-4": {
-            "AnimeDb\\Bundle\\AniDbFillerBundle\\": "src/",
-            "AnimeDb\\Bundle\\AniDbBrowserBundle\\Tests\\": "tests/"
-        }
-    },
-    "require": {
-        "php": ">=5.4.0",
-        "anime-db/catalog-bundle": ">=0.4.14",
-        "anime-db/ani-db-browser-bundle": ">=1.0.0"
-    },
-    "minimum-stability": "dev"
+	"name" : "anime-db/ani-db-filler-bundle",
+	"license" : "GPL-3.0",
+	"type" : "anime-db-plugin",
+	"description" : "Plugin AniDB for the catalog Anime DB",
+	"homepage" : "http://github.com/anime-db/ani-db-filler-bundle",
+	"version" : "0.1.7",
+	"autoload" : {
+		"psr-4" : {
+			"AnimeDb\\Bundle\\AniDbFillerBundle\\" : "src/",
+			"AnimeDb\\Bundle\\AniDbBrowserBundle\\Tests\\" : "tests/"
+		}
+	},
+	"require" : {
+		"php" : ">=5.4.0",
+		"anime-db/catalog-bundle" : ">=0.4.14",
+		"anime-db/ani-db-browser-bundle" : ">=1.0.0"
+	},
+	"minimum-stability" : "dev"
 }
