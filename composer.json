@@ -13,7 +13,7 @@
 	},
 	"require" : {
 		"php" : ">=5.4.0",
-		"anime-db/catalog-bundle" : ">=0.4.14",
+		"anime-db/catalog-bundle" : "dev-develop",
 		"anime-db/ani-db-browser-bundle" : ">=1.0.0"
 	},
 	"minimum-stability" : "dev"
