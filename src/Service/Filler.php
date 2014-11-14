@@ -13,7 +13,7 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Filler\Filler as FillerPlugin;
 use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use AnimeDb\Bundle\AppBundle\Service\Downloader;
 use AnimeDb\Bundle\CatalogBundle\Entity\Item;
 use AnimeDb\Bundle\CatalogBundle\Entity\Name;
 use AnimeDb\Bundle\CatalogBundle\Entity\Source;
@@ -69,11 +69,11 @@ class Filler extends FillerPlugin
     private $doctrine;
 
     /**
-     * Validator
+     * Downloader
      *
-     * @var \Symfony\Component\Validator\Validator\ValidatorInterface
+     * @var \AnimeDb\Bundle\AppBundle\Service\Downloader
      */
-    private $validator;
+    private $downloader;
 
     /**
      * Locale
@@ -181,18 +181,18 @@ class Filler extends FillerPlugin
      *
      * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
      * @param \Doctrine\Bundle\DoctrineBundle\Registry $doctrine
-     * @param \Symfony\Component\Validator\Validator\ValidatorInterface $validator
+     * @param \AnimeDb\Bundle\AppBundle\Service\Downloader $downloader
      * @param string $locale
      */
     public function __construct(
         Browser $browser,
         Registry $doctrine,
-        ValidatorInterface $validator,
+        Downloader $downloader,
         $locale
     ) {
         $this->browser = $browser;
         $this->doctrine = $doctrine;
-        $this->validator = $validator;
+        $this->downloader = $downloader;
         $this->locale = $locale;
     }
 
@@ -451,11 +451,9 @@ class Filler extends FillerPlugin
      *
      * @return string
      */
-    protected function uploadImage($url, $target = null) {
-        $image = new ImageField();
-        $image->setRemote($url);
-        $image->upload($this->validator, $target);
-        return $image->getPath();
+    protected function uploadImage($url, $target) {
+        $this->downloader->image($url, $target);
+        return $target;
     }
 
     /**
