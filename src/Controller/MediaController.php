@@ -12,6 +12,7 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Guzzle\Http\Client;
 
 /**
  * Media
@@ -52,10 +53,11 @@ class MediaController extends Controller
 
         if ($image = $body->filter('picture')->text()) {
             $image = $this->get('anime_db.ani_db.browser')->getImageUrl($image);
-            if (!($content = @file_get_contents($image, false))) {
+            $image_response = (new Client())->get($image)->send();
+            if (!$image_response->isSuccessful()) {
                 throw new \RuntimeException('Failed download image from anidb.net');
             }
-            $response->setContent($content);
+            $response->setContent($image_response->getBody(true));
         } else {
             throw $this->createNotFoundException('Cover not found');
         }
