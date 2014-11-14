@@ -10,7 +10,7 @@ services:
 
     anime_db.ani_db.filler:
         class: AnimeDb\Bundle\AniDbFillerBundle\Service\Filler
-        arguments: [ @anime_db.ani_db.browser, @doctrine, @validator, %locale% ]
+        arguments: [ @anime_db.ani_db.browser, @doctrine, @anime_db.downloader, %locale% ]
         tags:
             - { name: anime_db.filler }
         calls:
