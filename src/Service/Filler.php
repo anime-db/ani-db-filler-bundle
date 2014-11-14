@@ -413,7 +413,7 @@ class Filler extends FillerPlugin
         ];
         $type = $body->filter('anime > type')->text();
         $type = isset($rename[$type]) ? $rename[$type] : $type;
-        return $item->setType($this->doctrine->getRepository('AnimeDbCatalogBundle:Type')->findOneByName($type));
+        return $item->setType($this->doctrine->getRepository('AnimeDbCatalogBundle:Type')->findOneBy(['name' => $type]));
     }
 
     /**
@@ -430,9 +430,9 @@ class Filler extends FillerPlugin
         $categories = $body->filter('categories > category > name');
         foreach ($categories as $category) {
             if (isset($this->category_to_genre[$category->nodeValue])) {
-                $genre = $repository->findOneByName($this->category_to_genre[$category->nodeValue]);
+                $genre = $repository->findOne(['name' => $this->category_to_genre[$category->nodeValue]]);
             } else {
-                $genre = $repository->findOneByName($category->nodeValue);
+                $genre = $repository->findOne(['name' => $category->nodeValue]);
             }
             if ($genre instanceof Genre) {
                 $item->addGenre($genre);
