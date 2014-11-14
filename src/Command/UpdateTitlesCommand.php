@@ -57,7 +57,9 @@ class UpdateTitlesCommand extends ContainerAwareCommand
             }
             $file = sys_get_temp_dir().'/'.pathinfo($path, PATHINFO_BASENAME);
             if (!file_exists($file) || filemtime($file)+self::CACHE_LIFE_TIME < $now) {
-                if (@!copy($url, $file)) {
+                /* @var $downloader \AnimeDb\Bundle\AppBundle\Service\Downloader */
+                $downloader = $this->getContainer()->get('anime_db.downloader');
+                if (!$downloader->download($url, $file)) {
                     throw new \RuntimeException('Failed to download the titles database');
                 }
                 $output->writeln('The titles database is loaded');
