@@ -30,6 +30,6 @@ services:
 
     anime_db.ani_db.listener.refiller:
         class: AnimeDb\Bundle\AniDbFillerBundle\Event\Listener\Refiller
-        arguments: [ @anime_db.ani_db.refiller, @anime_db.ani_db.filler ]
+        arguments: [ @event_dispatcher, @anime_db.ani_db.refiller, @anime_db.ani_db.filler ]
         tags:
             - { name: kernel.event_listener, event: anime_db.storage.add_new_item, method: onAddNewItem }
