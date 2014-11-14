@@ -10,6 +10,7 @@
 
 namespace AnimeDb\Bundle\AniDbFillerBundle\Event\Listener;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller as RefillerService;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Filler;
 use AnimeDb\Bundle\CatalogBundle\Event\Storage\AddNewItem;
@@ -38,13 +39,22 @@ class Refiller
     protected $filler;
 
     /**
+     * Dispatcher
+     *
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     */
+    protected $dispatcher;
+
+    /**
      * Construct
      *
+     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      * @param \AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller $refiller
      * @param \AnimeDb\Bundle\AniDbFillerBundle\Service\Filler $filler
      */
-    public function __construct(RefillerService $refiller, Filler $filler)
+    public function __construct(EventDispatcherInterface $dispatcher, RefillerService $refiller, Filler $filler)
     {
+        $this->dispatcher = $dispatcher;
         $this->refiller = $refiller;
         $this->filler = $filler;
     }
@@ -88,7 +98,7 @@ class Refiller
 
             $event->addFiller($this->filler);
             // resend event
-            $event->getDispatcher()->dispatch(StoreEvents::ADD_NEW_ITEM, clone $event);
+            $this->dispatcher->dispatch(StoreEvents::ADD_NEW_ITEM, clone $event);
             $event->stopPropagation();
         }
     }
