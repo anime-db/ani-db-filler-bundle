@@ -20,7 +20,7 @@ use AnimeDb\Bundle\CatalogBundle\Entity\Source;
 use AnimeDb\Bundle\CatalogBundle\Entity\Type;
 use AnimeDb\Bundle\CatalogBundle\Entity\Genre;
 use AnimeDb\Bundle\AppBundle\Entity\Field\Image as ImageField;
-use AnimeDb\Bundle\AniDbFillerBundle\Form\Filler as FillerForm;
+use AnimeDb\Bundle\AniDbFillerBundle\Form\Type\Filler as FillerForm;
 use Symfony\Component\DomCrawler\Crawler;
 use Knp\Menu\ItemInterface;
 
