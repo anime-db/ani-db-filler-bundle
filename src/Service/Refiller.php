@@ -119,16 +119,7 @@ class Refiller extends RefillerPlugin
      */
     public function isCanRefill(Item $item, $field)
     {
-        if (!in_array($field, $this->supported_fields)) {
-            return false;
-        }
-        /* @var $source \AnimeDb\Bundle\CatalogBundle\Entity\Source */
-        foreach ($item->getSources() as $source) {
-            if (strpos($source->getUrl(), $this->browser->getHost()) === 0) {
-                return true;
-            }
-        }
-        return false;
+        return in_array($field, $this->supported_fields) && $this->getSourceForFill($item);
     }
 
     /**
@@ -141,14 +132,7 @@ class Refiller extends RefillerPlugin
      */
     public function refill(Item $item, $field)
     {
-        // get source url
-        $url = '';
-        foreach ($item->getSources() as $source) {
-            if (strpos($source->getUrl(), $this->browser->getHost()) === 0) {
-                $url = $source->getUrl();
-                break;
-            }
-        }
+        $url = $this->getSourceForFill($item);
         if (!$url || !preg_match(Filler::REG_ITEM_ID, $url, $match)) {
             return $item;
         }
@@ -261,14 +245,7 @@ class Refiller extends RefillerPlugin
      */
     public function search(Item $item, $field)
     {
-        // search source url
-        $url = '';
-        foreach ($item->getSources() as $source) {
-            if (strpos($source->getUrl(), $this->browser->getHost()) === 0) {
-                $url = $source->getUrl();
-                break;
-            }
-        }
+        $url = $this->getSourceForFill($item);
         // can refill from source. not need search
         if ($url) {
             return [
@@ -335,5 +312,23 @@ class Refiller extends RefillerPlugin
             $item = $this->refill($item, $field);
         }
         return $item;
+    }
+
+    /**
+     * Get source for fill
+     *
+     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
+     *
+     * @return string
+     */
+    public function getSourceForFill(Item $item)
+    {
+        /* @var $source \AnimeDb\Bundle\CatalogBundle\Entity\Source */
+        foreach ($item->getSources() as $source) {
+            if (strpos($source->getUrl(), $this->browser->getHost()) === 0) {
+                return $source->getUrl();
+            }
+        }
+        return '';
     }
 }
