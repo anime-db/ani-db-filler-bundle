@@ -15,6 +15,7 @@ use AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller as RefillerService;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Filler;
 use AnimeDb\Bundle\CatalogBundle\Event\Storage\AddNewItem;
 use AnimeDb\Bundle\CatalogBundle\Event\Storage\StoreEvents;
+use AnimeDb\Bundle\CatalogBundle\Entity\Name;
 
 /**
  * Refiller for new item
@@ -86,14 +87,17 @@ class Refiller
             if (!$item->getSummary()) {
                 $item->setSummary($new_item->getSummary());
             }
-            foreach ($new_item->getGenres() as $genre) {
-                $item->addGenre($genre);
+            foreach ($new_item->getGenres() as $new_genre) {
+                $item->addGenre($new_genre);
             }
-            foreach ($new_item->getNames() as $name) {
-                $item->addName($name);
+            // set main name in top of names list
+            $new_names = $new_item->getNames()->toArray();
+            array_unshift($new_names, (new Name())->setName($new_item->getName()));
+            foreach ($new_names as $new_name) {
+                $item->addName($new_name);
             }
-            foreach ($new_item->getSources() as $source) {
-                $item->addSource($source);
+            foreach ($new_item->getSources() as $new_source) {
+                $item->addSource($new_source);
             }
 
             $event->addFiller($this->filler);
