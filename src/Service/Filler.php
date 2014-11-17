@@ -445,7 +445,7 @@ class Filler extends FillerPlugin
      * Upload image from url
      *
      * @param string $url
-     * @param string|null $target
+     * @param string $target
      *
      * @return string
      */
