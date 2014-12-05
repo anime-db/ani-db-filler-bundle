@@ -21,6 +21,7 @@ use AnimeDb\Bundle\CatalogBundle\Entity\Genre;
 use AnimeDb\Bundle\AniDbFillerBundle\Form\Type\Filler as FillerForm;
 use Symfony\Component\DomCrawler\Crawler;
 use Knp\Menu\ItemInterface;
+use AnimeDb\Bundle\AppBundle\Service\Downloader\Entity\EntityInterface;
 
 /**
  * Search from site AniDB.net
@@ -341,7 +342,8 @@ class Filler extends FillerPlugin
                 $image = $this->browser->getImageUrl($image);
                 if ($path = parse_url($image, PHP_URL_PATH)) {
                     $ext = pathinfo($path, PATHINFO_EXTENSION);
-                    $item->setCover($this->uploadImage($image, self::NAME.'/'.$id.'/cover.'.$ext));
+                    $item->setCover(self::NAME.'/'.$id.'/cover.'.$ext);
+                    $this->uploadImage($image, $item);
                 }
             } catch (\Exception $e) {} // error while retrieving images is not critical
         }
@@ -445,13 +447,12 @@ class Filler extends FillerPlugin
      * Upload image from url
      *
      * @param string $url
-     * @param string $target
+     * @param \AnimeDb\Bundle\AppBundle\Service\Downloader\Entity\EntityInterface $entity
      *
-     * @return string
+     * @return boolean
      */
-    protected function uploadImage($url, $target) {
-        $this->downloader->image($url, $target);
-        return $target;
+    protected function uploadImage($url, EntityInterface $entity) {
+        return $this->downloader->image($url, $this->downloader->getRoot().$entity->getWebPath());
     }
 
     /**
