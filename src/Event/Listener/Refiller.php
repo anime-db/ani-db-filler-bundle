@@ -69,7 +69,11 @@ class Refiller
     {
         $item = $event->getItem();
         if (!$event->getFillers()->contains($this->filler) && ($url = $this->refiller->getSourceForFill($item))) {
-            $new_item = $this->filler->fill(['url' => $url]);
+            try {
+                $new_item = $this->filler->fill(['url' => $url]);
+            } catch (\Exception $e) {
+                return;
+            }
 
             // fill item
             if (!$item->getDateEnd()) {
