@@ -91,6 +91,12 @@ class Refiller
             if (!$item->getSummary()) {
                 $item->setSummary($new_item->getSummary());
             }
+            if (!$item->getType()) {
+                $item->setType($new_item->getType());
+            }
+            if (!$item->getCover()) {
+                $item->setCover($new_item->getCover());
+            }
             foreach ($new_item->getGenres() as $new_genre) {
                 $item->addGenre($new_genre);
             }
