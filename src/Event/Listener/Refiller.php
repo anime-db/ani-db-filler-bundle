@@ -13,6 +13,7 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Event\Listener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller as RefillerService;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Filler;
+use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
 use AnimeDb\Bundle\CatalogBundle\Event\Storage\AddNewItem;
 use AnimeDb\Bundle\CatalogBundle\Event\Storage\StoreEvents;
 use AnimeDb\Bundle\CatalogBundle\Entity\Name;
@@ -40,6 +41,13 @@ class Refiller
     protected $filler;
 
     /**
+     * Browser
+     *
+     * @var \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser
+     */
+    private $browser;
+
+    /**
      * Dispatcher
      *
      * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
@@ -52,12 +60,18 @@ class Refiller
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      * @param \AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller $refiller
      * @param \AnimeDb\Bundle\AniDbFillerBundle\Service\Filler $filler
+     * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
      */
-    public function __construct(EventDispatcherInterface $dispatcher, RefillerService $refiller, Filler $filler)
-    {
+    public function __construct(
+        EventDispatcherInterface $dispatcher,
+        RefillerService $refiller,
+        Filler $filler,
+        Browser $browser
+    ) {
         $this->dispatcher = $dispatcher;
         $this->refiller = $refiller;
         $this->filler = $filler;
+        $this->browser = $browser;
     }
 
     /**
@@ -68,46 +82,50 @@ class Refiller
     public function onAddNewItem(AddNewItem $event)
     {
         $item = $event->getItem();
-        if (!$event->getFillers()->contains($this->filler) && ($url = $this->refiller->getSourceForFill($item))) {
+        if (!$event->getFillers()->contains($this->filler) &&
+            ($url = $this->refiller->getSourceForFill($item)) &&
+            preg_match(Filler::REG_ITEM_ID, $url, $match)
+        ) {
             try {
-                $new_item = $this->filler->fill(['url' => $url]);
+                // get data
+                $body = $this->browser->get('anime', ['aid' => $match['id']]);
             } catch (\Exception $e) {
                 return;
             }
 
             // fill item
             if (!$item->getDateEnd()) {
-                $item->setDateEnd($new_item->getDateEnd());
+                $item->setDateEnd(new \DateTime($body->filter('enddate')->text()));
             }
             if (!$item->getDatePremiere()) {
-                $item->setDatePremiere($new_item->getDatePremiere());
+                $item->setDatePremiere(new \DateTime($body->filter('startdate')->text()));
             }
             if (!$item->getEpisodes()) {
-                $item->setEpisodes($new_item->getEpisodes());
+                $this->filler->setEpisodes($item, $body);
             }
             if (!$item->getEpisodesNumber()) {
-                $item->setEpisodesNumber($new_item->getEpisodesNumber());
+                $item->setEpisodesNumber($body->filter('episodecount')->text());
             }
             if (!$item->getSummary()) {
-                $item->setSummary($new_item->getSummary());
+                $reg = '#'.preg_quote($this->browser->getHost()).'/ch\d+ \[([^\]]+)\]#';
+                $item->setSummary(preg_replace($reg, '$1', $body->filter('description')->text()));
             }
             if (!$item->getType()) {
-                $item->setType($new_item->getType());
+                $this->filler->setType($item, $body);
             }
             if (!$item->getCover()) {
-                $item->setCover($new_item->getCover());
+                $this->filler->setCover($item, $body, $match['id']);
             }
-            foreach ($new_item->getGenres() as $new_genre) {
-                $item->addGenre($new_genre);
-            }
+            $this->filler->setGenres($item, $body);
+
+            // copy main and other names
+            $new_item = $this->filler->setNames(new Item(), $body);
             // set main name in top of names list
             $new_names = $new_item->getNames()->toArray();
             array_unshift($new_names, (new Name())->setName($new_item->getName()));
+            /* @var $new_name \AnimeDb\Bundle\CatalogBundle\Entity\Name */
             foreach ($new_names as $new_name) {
-                $item->addName($new_name);
-            }
-            foreach ($new_item->getSources() as $new_source) {
-                $item->addSource($new_source);
+                $item->addName($new_name->setItem(null));
             }
 
             $event->addFiller($this->filler);
