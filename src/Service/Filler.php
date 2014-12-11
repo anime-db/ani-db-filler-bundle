@@ -432,9 +432,9 @@ class Filler extends FillerPlugin
         $categories = $body->filter('categories > category > name');
         foreach ($categories as $category) {
             if (isset($this->category_to_genre[$category->nodeValue])) {
-                $genre = $repository->findOne(['name' => $this->category_to_genre[$category->nodeValue]]);
+                $genre = $repository->findOneBy(['name' => $this->category_to_genre[$category->nodeValue]]);
             } else {
-                $genre = $repository->findOne(['name' => $category->nodeValue]);
+                $genre = $repository->findOneBy(['name' => $category->nodeValue]);
             }
             if ($genre instanceof Genre) {
                 $item->addGenre($genre);
