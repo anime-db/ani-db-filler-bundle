@@ -16,6 +16,7 @@ use AnimeDb\Bundle\AniDbFillerBundle\Service\Filler;
 use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
 use AnimeDb\Bundle\CatalogBundle\Event\Storage\AddNewItem;
 use AnimeDb\Bundle\CatalogBundle\Event\Storage\StoreEvents;
+use AnimeDb\Bundle\CatalogBundle\Entity\Item;
 use AnimeDb\Bundle\CatalogBundle\Entity\Name;
 
 /**
