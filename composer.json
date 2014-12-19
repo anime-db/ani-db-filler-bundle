@@ -4,7 +4,7 @@
 	"type" : "anime-db-plugin",
 	"description" : "Plugin AniDB for the catalog Anime DB",
 	"homepage" : "http://github.com/anime-db/ani-db-filler-bundle",
-	"version" : "0.1.7",
+	"version" : "0.1.8",
 	"autoload" : {
 		"psr-4" : {
 			"AnimeDb\\Bundle\\AniDbFillerBundle\\" : "src/",
@@ -13,7 +13,7 @@
 	},
 	"require" : {
 		"php" : ">=5.4.0",
-		"anime-db/catalog-bundle" : "dev-develop",
+		"anime-db/catalog-bundle" : ">=0.4.17",
 		"anime-db/ani-db-browser-bundle" : ">=1.0.0"
 	},
 	"minimum-stability" : "dev"
