@@ -50,19 +50,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
 
         if (!file_exists($file_csv) || filemtime($file_csv)+self::CACHE_LIFE_TIME < $now) {
 
-            // download the original db if need and cache it in system temp dir
-            $url = $this->getContainer()->getParameter('anime_db.ani_db.import_titles');
-            if (($path = parse_url($url, PHP_URL_PATH)) === false) {
-                throw new \InvalidArgumentException('Failed parse URL: '.$url);
-            }
-            $file = sys_get_temp_dir().'/'.pathinfo($path, PATHINFO_BASENAME);
-            if (!file_exists($file) || filemtime($file)+self::CACHE_LIFE_TIME < $now) {
-                if (@!copy($url, $file)) {
-                    throw new \RuntimeException('Failed to download the titles database');
-                }
-                $output->writeln('The titles database is loaded');
-            }
-
+            $file = $this->getOriginDb($output, $now);
             $output->writeln('Start assembling database');
 
             // clear list titles and add unified title
@@ -91,6 +79,41 @@ class UpdateTitlesCommand extends ContainerAwareCommand
         } else {
             $output->writeln('Update is not needed');
         }
+    }
+
+    /**
+     * Get original db file
+     *
+     * Download the original db if need and cache it in a system temp dir
+     *
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
+     *
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param integer $now
+     *
+     * @return string
+     */
+    protected function getOriginDb(OutputInterface $output, $now)
+    {
+        $url = $this->getContainer()->getParameter('anime_db.ani_db.import_titles');
+
+        if (($path = parse_url($url, PHP_URL_PATH)) === false) {
+            throw new \InvalidArgumentException('Failed parse URL: '.$url);
+        }
+
+        $file = sys_get_temp_dir().'/'.pathinfo($path, PATHINFO_BASENAME);
+
+        if (!file_exists($file) || filemtime($file)+self::CACHE_LIFE_TIME < $now) {
+            /* @var $downloader \AnimeDb\Bundle\AppBundle\Service\Downloader */
+            $downloader = $this->getContainer()->get('anime_db.downloader');
+            if (!$downloader->download($url, $file)) {
+                throw new \RuntimeException('Failed to download the titles database');
+            }
+            $output->writeln('The titles database is loaded');
+        }
+
+        return $file;
     }
 
     /**

@@ -8,7 +8,7 @@
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
 
-namespace AnimeDb\Bundle\AniDbFillerBundle\Form;
+namespace AnimeDb\Bundle\AniDbFillerBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,7 +16,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 /**
  * Get item from filler
  *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Form
+ * @package AnimeDb\Bundle\AniDbFillerBundle\Form\Type
  * @author  Peter Gribanov <info@peter-gribanov.ru>
  */
 class Filler extends AbstractType

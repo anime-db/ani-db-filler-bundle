@@ -12,7 +12,7 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Guzzle\Http\Client;
 
 /**
  * Media
@@ -39,21 +39,12 @@ class MediaController extends Controller
      */
     public function coverAction($id, Request $request)
     {
-        $response = new Response();
-        $response->headers->set('Content-Type', 'image/jpeg');
-        // set lifetime
-        $response->setMaxAge(self::CACHE_LIFETIME);
-        $response->setSharedMaxAge(self::CACHE_LIFETIME);
-        $response->setExpires((new \DateTime())->modify('+'.self::CACHE_LIFETIME.' seconds'));
-        // caching
-        if ($last_update = $this->container->getParameter('last_update')) {
-            $response->setLastModified(new \DateTime($last_update));
-        }
-
         /* @var $body \Symfony\Component\DomCrawler\Crawler */
         $body = $this->get('anime_db.ani_db.browser')->get('anime', ['aid' => $id]);
-
-        $response->setEtag(sha1($body->html()));
+        /* @var $response \Symfony\Component\HttpFoundation\Response */
+        $response = $this->get('cache_time_keeper')->getResponse([], self::CACHE_LIFETIME)
+            ->setEtag(sha1($body->html()));
+        $response->headers->set('Content-Type', 'image/jpeg');
 
         // response was not modified for this request
         if ($response->isNotModified($request)) {
@@ -62,10 +53,11 @@ class MediaController extends Controller
 
         if ($image = $body->filter('picture')->text()) {
             $image = $this->get('anime_db.ani_db.browser')->getImageUrl($image);
-            if (!($content = @file_get_contents($image, false))) {
+            $image_response = (new Client())->get($image)->send();
+            if (!$image_response->isSuccessful()) {
                 throw new \RuntimeException('Failed download image from anidb.net');
             }
-            $response->setContent($content);
+            $response->setContent($image_response->getBody(true));
         } else {
             throw $this->createNotFoundException('Cover not found');
         }

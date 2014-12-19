@@ -13,16 +13,15 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Filler\Filler as FillerPlugin;
 use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use AnimeDb\Bundle\AppBundle\Service\Downloader;
 use AnimeDb\Bundle\CatalogBundle\Entity\Item;
 use AnimeDb\Bundle\CatalogBundle\Entity\Name;
 use AnimeDb\Bundle\CatalogBundle\Entity\Source;
-use AnimeDb\Bundle\CatalogBundle\Entity\Type;
 use AnimeDb\Bundle\CatalogBundle\Entity\Genre;
-use AnimeDb\Bundle\AppBundle\Entity\Field\Image as ImageField;
-use AnimeDb\Bundle\AniDbFillerBundle\Form\Filler as FillerForm;
+use AnimeDb\Bundle\AniDbFillerBundle\Form\Type\Filler as FillerForm;
 use Symfony\Component\DomCrawler\Crawler;
 use Knp\Menu\ItemInterface;
+use AnimeDb\Bundle\AppBundle\Service\Downloader\Entity\EntityInterface;
 
 /**
  * Search from site AniDB.net
@@ -69,11 +68,11 @@ class Filler extends FillerPlugin
     private $doctrine;
 
     /**
-     * Validator
+     * Downloader
      *
-     * @var \Symfony\Component\Validator\Validator\ValidatorInterface
+     * @var \AnimeDb\Bundle\AppBundle\Service\Downloader
      */
-    private $validator;
+    private $downloader;
 
     /**
      * Locale
@@ -181,18 +180,18 @@ class Filler extends FillerPlugin
      *
      * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
      * @param \Doctrine\Bundle\DoctrineBundle\Registry $doctrine
-     * @param \Symfony\Component\Validator\Validator\ValidatorInterface $validator
+     * @param \AnimeDb\Bundle\AppBundle\Service\Downloader $downloader
      * @param string $locale
      */
     public function __construct(
         Browser $browser,
         Registry $doctrine,
-        ValidatorInterface $validator,
+        Downloader $downloader,
         $locale
     ) {
         $this->browser = $browser;
         $this->doctrine = $doctrine;
-        $this->validator = $validator;
+        $this->downloader = $downloader;
         $this->locale = $locale;
     }
 
@@ -217,7 +216,7 @@ class Filler extends FillerPlugin
     /**
      * Get form
      *
-     * @return \AnimeDb\Bundle\AniDbFillerBundle\Form\Filler
+     * @return \AnimeDb\Bundle\AniDbFillerBundle\Form\Type\Filler
      */
     public function getForm()
     {
@@ -343,7 +342,8 @@ class Filler extends FillerPlugin
                 $image = $this->browser->getImageUrl($image);
                 if ($path = parse_url($image, PHP_URL_PATH)) {
                     $ext = pathinfo($path, PATHINFO_EXTENSION);
-                    $item->setCover($this->uploadImage($image, self::NAME.'/'.$id.'/cover.'.$ext));
+                    $item->setCover(self::NAME.'/'.$id.'/cover.'.$ext);
+                    $this->uploadImage($image, $item);
                 }
             } catch (\Exception $e) {} // error while retrieving images is not critical
         }
@@ -415,7 +415,7 @@ class Filler extends FillerPlugin
         ];
         $type = $body->filter('anime > type')->text();
         $type = isset($rename[$type]) ? $rename[$type] : $type;
-        return $item->setType($this->doctrine->getRepository('AnimeDbCatalogBundle:Type')->findOneByName($type));
+        return $item->setType($this->doctrine->getRepository('AnimeDbCatalogBundle:Type')->findOneBy(['name' => $type]));
     }
 
     /**
@@ -432,9 +432,9 @@ class Filler extends FillerPlugin
         $categories = $body->filter('categories > category > name');
         foreach ($categories as $category) {
             if (isset($this->category_to_genre[$category->nodeValue])) {
-                $genre = $repository->findOneByName($this->category_to_genre[$category->nodeValue]);
+                $genre = $repository->findOneBy(['name' => $this->category_to_genre[$category->nodeValue]]);
             } else {
-                $genre = $repository->findOneByName($category->nodeValue);
+                $genre = $repository->findOneBy(['name' => $category->nodeValue]);
             }
             if ($genre instanceof Genre) {
                 $item->addGenre($genre);
@@ -447,15 +447,12 @@ class Filler extends FillerPlugin
      * Upload image from url
      *
      * @param string $url
-     * @param string|null $target
+     * @param \AnimeDb\Bundle\AppBundle\Service\Downloader\Entity\EntityInterface $entity
      *
-     * @return string
+     * @return boolean
      */
-    protected function uploadImage($url, $target = null) {
-        $image = new ImageField();
-        $image->setRemote($url);
-        $image->upload($this->validator, $target);
-        return $image->getPath();
+    protected function uploadImage($url, EntityInterface $entity) {
+        return $this->downloader->image($url, $this->downloader->getRoot().$entity->getWebPath());
     }
 
     /**
