@@ -475,4 +475,16 @@ class Filler extends FillerPlugin
         }
         return $name;
     }
+
+    /**
+     * Is supported URL
+     *
+     * @param string $url
+     *
+     * @return boolean
+     */
+    public function isSupportedUrl($url)
+    {
+        return strpos($url, $this->browser->getHost()) === 0;
+    }
 }
