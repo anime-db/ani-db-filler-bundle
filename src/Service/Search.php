@@ -1,13 +1,11 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Search\Search as SearchPlugin;
@@ -16,7 +14,7 @@ use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
 use Knp\Menu\ItemInterface;
 
 /**
- * Search from site AniDB.net
+ * Search from site AniDB.net.
  */
 class Search extends SearchPlugin
 {
@@ -56,7 +54,8 @@ class Search extends SearchPlugin
      * @param string $cache_dir
      * @param string $locale
      */
-    public function __construct(Browser $browser, $titles_db, $cache_dir, $locale) {
+    public function __construct(Browser $browser, $titles_db, $cache_dir, $locale)
+    {
         $this->browser = $browser;
         $this->locale = $locale;
         $this->titles_db = $cache_dir.'/'.$titles_db;
@@ -79,7 +78,7 @@ class Search extends SearchPlugin
     }
 
     /**
-     * Build menu for plugin
+     * Build menu for plugin.
      *
      * @param ItemInterface $item
      *
@@ -92,7 +91,7 @@ class Search extends SearchPlugin
     }
 
     /**
-     * Search source by name
+     * Search source by name.
      *
      * @param array $data
      *
@@ -112,7 +111,7 @@ class Search extends SearchPlugin
         $fp = gzopen($this->titles_db, 'r');
         while (!gzeof($fp)) {
             $line = trim(gzgets($fp, 4096));
-            list($aid, $type, $lang, $unified, ) = explode('|', $line);
+            list($aid, $type, $lang, $unified) = explode('|', $line);
             if (mb_strpos($unified, $search, 0, 'utf8') === 0) {
                 if ($type == 1 || ($type == 4 && $lang == $this->locale) || empty($titles[$aid])) {
                     $aids[] = $aid;
@@ -171,6 +170,7 @@ class Search extends SearchPlugin
     {
         $title = mb_strtolower($title, 'utf8');
         $title = preg_replace('/\W+/u', ' ', $title);
+
         return trim($title);
     }
 
@@ -180,7 +180,7 @@ class Search extends SearchPlugin
      *
      * @return string
      */
-    protected function getNameForLocale($locale, & $names)
+    protected function getNameForLocale($locale, &$names)
     {
         if (isset($names[$locale][1])) {
             $name = $names[$locale][1];
@@ -191,6 +191,7 @@ class Search extends SearchPlugin
         } else {
             $name = array_shift($names[$locale]);
         }
+
         return $name;
     }
 }
