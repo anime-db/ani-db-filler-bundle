@@ -16,23 +16,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Update list of titles from AniDB.net
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Command
- * @author  Peter Gribanov <info@peter-gribanov.ru>
  */
 class UpdateTitlesCommand extends ContainerAwareCommand
 {
     /**
-     * Cache life time
-     *
      * @var integer
      */
     const CACHE_LIFE_TIME = 86400;
 
-    /**
-     * (non-PHPdoc)
-     * @see Symfony\Component\Console\Command.Command::configure()
-     */
     protected function configure()
     {
         $this->setName('animedb:update-titles')
@@ -40,8 +31,8 @@ class UpdateTitlesCommand extends ContainerAwareCommand
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Symfony\Component\Console\Command.Command::execute()
+     * @param InputInterface $input
+     * @param OutputInterface $output
      */
     protected function execute(InputInterface $input, OutputInterface $output) {
         $now = time();
@@ -89,7 +80,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param OutputInterface $output
      * @param integer $now
      *
      * @return string
@@ -117,9 +108,8 @@ class UpdateTitlesCommand extends ContainerAwareCommand
     }
 
     /**
-     * Get unified title
-     *
      * @param string $title
+     *
      * @return string
      */
     protected function getUnifiedTitle($title)

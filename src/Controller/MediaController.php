@@ -11,21 +11,15 @@
 namespace AnimeDb\Bundle\AniDbFillerBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Guzzle\Http\Client;
+use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Media
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Controller
- * @author  Peter Gribanov <info@peter-gribanov.ru>
- */
 class MediaController extends Controller
 {
     /**
-     * Cache lifetime 6 month
-     *
-     * @var ineteger
+     * @var int
      */
     const CACHE_LIFETIME = 15552000;
 
@@ -33,15 +27,15 @@ class MediaController extends Controller
      * Get cover from anidb.net item id
      *
      * @param string $id
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param Request $request
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function coverAction($id, Request $request)
     {
-        /* @var $body \Symfony\Component\DomCrawler\Crawler */
+        /* @var $body Crawler */
         $body = $this->get('anime_db.ani_db.browser')->get('anime', ['aid' => $id]);
-        /* @var $response \Symfony\Component\HttpFoundation\Response */
+        /* @var $response Response */
         $response = $this->get('cache_time_keeper')->getResponse([], self::CACHE_LIFETIME)
             ->setEtag(sha1($body->html()));
         $response->headers->set('Content-Type', 'image/jpeg');

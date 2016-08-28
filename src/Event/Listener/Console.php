@@ -16,22 +16,15 @@ use Symfony\Component\Process\Process;
 
 /**
  * Update the titles db on clear cache
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Event\Listener
- * @author  Peter Gribanov <info@peter-gribanov.ru>
  */
 class Console
 {
     /**
-     * Root dir
-     *
      * @var string
      */
     protected $root_dir;
 
     /**
-     * Construct
-     *
      * @param string $root_dir
      */
     public function __construct($root_dir)
@@ -40,9 +33,7 @@ class Console
     }
 
     /**
-     * On Terminate command
-     *
-     * @param \Symfony\Component\Console\Event\ConsoleTerminateEvent $event
+     * @param ConsoleTerminateEvent $event
      */
     public function onTerminate(ConsoleTerminateEvent $event)
     {

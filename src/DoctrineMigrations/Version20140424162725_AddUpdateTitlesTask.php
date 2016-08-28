@@ -14,14 +14,10 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use AnimeDb\Bundle\AppBundle\Entity\Task;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 class Version20140424162725_AddUpdateTitlesTask extends AbstractMigration
 {
     /**
-     * (non-PHPdoc)
-     * @see \Doctrine\DBAL\Migrations\AbstractMigration::up()
+     * @param Schema $schema
      */
     public function up(Schema $schema)
     {
@@ -45,8 +41,7 @@ class Version20140424162725_AddUpdateTitlesTask extends AbstractMigration
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Doctrine\DBAL\Migrations\AbstractMigration::down()
+     * @param Schema $schema
      */
     public function down(Schema $schema)
     {

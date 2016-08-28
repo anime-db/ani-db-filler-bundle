@@ -15,9 +15,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 /**
  * Get item from filler
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Form\Type
- * @author  Peter Gribanov <info@peter-gribanov.ru>
  */
 class Filler extends AbstractType
 {
@@ -29,8 +26,6 @@ class Filler extends AbstractType
     protected $host;
 
     /**
-     * Construct
-     *
      * @param string $host
      */
     public function __construct($host)
@@ -39,8 +34,8 @@ class Filler extends AbstractType
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Symfony\Component\Form\AbstractType::buildForm()
+     * @param FormBuilderInterface $builder
+     * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -55,8 +50,7 @@ class Filler extends AbstractType
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Symfony\Component\Form\FormTypeInterface::getName()
+     * @return string
      */
     public function getName()
     {

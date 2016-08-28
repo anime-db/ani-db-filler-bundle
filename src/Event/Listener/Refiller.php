@@ -21,47 +21,34 @@ use AnimeDb\Bundle\CatalogBundle\Entity\Name;
 
 /**
  * Refiller for new item
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Event\Listener
- * @author  Peter Gribanov <info@peter-gribanov.ru>
  */
 class Refiller
 {
     /**
-     * Refiller
-     *
-     * @var \AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller
+     * @var RefillerService
      */
     protected $refiller;
 
     /**
-     * Filler
-     *
-     * @var \AnimeDb\Bundle\AniDbFillerBundle\Service\Filler
+     * @var Filler
      */
     protected $filler;
 
     /**
-     * Browser
-     *
-     * @var \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser
+     * @var Browser
      */
     private $browser;
 
     /**
-     * Dispatcher
-     *
-     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     * @var EventDispatcherInterface
      */
     protected $dispatcher;
 
     /**
-     * Construct
-     *
-     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
-     * @param \AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller $refiller
-     * @param \AnimeDb\Bundle\AniDbFillerBundle\Service\Filler $filler
-     * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
+     * @param EventDispatcherInterface $dispatcher
+     * @param RefillerService $refiller
+     * @param Filler $filler
+     * @param Browser $browser
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
@@ -76,9 +63,7 @@ class Refiller
     }
 
     /**
-     * On add new item
-     *
-     * @param \AnimeDb\Bundle\CatalogBundle\Event\Storage\AddNewItem $event
+     * @param AddNewItem $event
      */
     public function onAddNewItem(AddNewItem $event)
     {
@@ -89,7 +74,7 @@ class Refiller
         ) {
             try {
                 // get data
-                $body = $this->browser->get('anime', ['aid' => $match['id']]);
+                $body = $this->browser->getCrawler('anime', ['aid' => $match['id']]);
             } catch (\Exception $e) {
                 return;
             }
@@ -124,7 +109,7 @@ class Refiller
             // set main name in top of names list
             $new_names = $new_item->getNames()->toArray();
             array_unshift($new_names, (new Name())->setName($new_item->getName()));
-            /* @var $new_name \AnimeDb\Bundle\CatalogBundle\Entity\Name */
+            /* @var $new_name Name */
             foreach ($new_names as $new_name) {
                 $item->addName($new_name->setItem(null));
             }

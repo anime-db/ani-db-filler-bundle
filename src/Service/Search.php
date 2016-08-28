@@ -17,59 +17,41 @@ use Knp\Menu\ItemInterface;
 
 /**
  * Search from site AniDB.net
- * 
- * @link http://anidb.net/
- * @package AnimeDb\Bundle\AniDbFillerBundle\Service
- * @author  Peter Gribanov <info@peter-gribanov.ru>
  */
 class Search extends SearchPlugin
 {
     /**
-     * Name
-     *
      * @var string
      */
     const NAME = 'anidb';
 
     /**
-     * Title
-     *
      * @var string
      */
     const TITLE = 'AniDB.net';
 
     /**
-     * Item link
-     *
      * @var string
      */
     const ITEM_LINK = '/perl-bin/animedb.pl?show=anime&aid=#ID#';
 
     /**
-     * Browser
-     *
-     * @var \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser
+     * @var Browser
      */
     protected $browser;
 
     /**
-     * Titeles DB
-     *
      * @var string
      */
     protected $titles_db;
 
     /**
-     * Locale
-     *
      * @var string
      */
     protected $locale;
 
     /**
-     * Construct
-     *
-     * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
+     * @param Browser $browser
      * @param string $titles_db
      * @param string $cache_dir
      * @param string $locale
@@ -81,29 +63,27 @@ class Search extends SearchPlugin
     }
 
     /**
-     * Get name
-     *
      * @return string
      */
-    public function getName() {
+    public function getName()
+    {
         return self::NAME;
     }
 
     /**
-     * Get title
-     *
      * @return string
      */
-    public function getTitle() {
+    public function getTitle()
+    {
         return self::TITLE;
     }
 
     /**
      * Build menu for plugin
      *
-     * @param \Knp\Menu\ItemInterface $item
+     * @param ItemInterface $item
      *
-     * @return \Knp\Menu\ItemInterface
+     * @return ItemInterface
      */
     public function buildMenu(ItemInterface $item)
     {
@@ -114,16 +94,9 @@ class Search extends SearchPlugin
     /**
      * Search source by name
      *
-     * Return structure
-     * <code>
-     * [
-     *     \AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Search\Item
-     * ]
-     * </code>
-     *
      * @param array $data
      *
-     * @return array
+     * @return ItemSearch[]
      */
     public function search(array $data)
     {
@@ -190,9 +163,8 @@ class Search extends SearchPlugin
     }
 
     /**
-     * Get unified title
-     *
      * @param string $title
+     *
      * @return string
      */
     protected function getUnifiedTitle($title)
@@ -203,10 +175,9 @@ class Search extends SearchPlugin
     }
 
     /**
-     * Get name for locale
-     *
      * @param string $locale
      * @param array $names
+     *
      * @return string
      */
     protected function getNameForLocale($locale, & $names)
