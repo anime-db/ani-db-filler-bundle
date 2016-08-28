@@ -314,7 +314,9 @@ class Filler extends FillerPlugin
                     $item->setCover(self::NAME.'/'.$id.'/cover.'.$ext);
                     $this->uploadImageFromUrl($image, $item);
                 }
-            } catch (\Exception $e) {} // error while retrieving images is not critical
+            } catch (\Exception $e) {
+                // error while retrieving images is not critical
+            }
         }
         return $item;
     }
