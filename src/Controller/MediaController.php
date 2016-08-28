@@ -1,13 +1,11 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -24,7 +22,7 @@ class MediaController extends Controller
     const CACHE_LIFETIME = 15552000;
 
     /**
-     * Get cover from anidb.net item id
+     * Get cover from anidb.net item id.
      *
      * @param string $id
      * @param Request $request

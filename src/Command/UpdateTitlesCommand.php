@@ -1,13 +1,11 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -15,12 +13,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Update list of titles from AniDB.net
+ * Update list of titles from AniDB.net.
  */
 class UpdateTitlesCommand extends ContainerAwareCommand
 {
     /**
-     * @var integer
+     * @var int
      */
     const CACHE_LIFE_TIME = 86400;
 
@@ -34,13 +32,13 @@ class UpdateTitlesCommand extends ContainerAwareCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      */
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $now = time();
         $file_csv = $this->getContainer()->getParameter('kernel.cache_dir').'/'.
             $this->getContainer()->getParameter('anime_db.ani_db.titles_db');
 
-        if (!file_exists($file_csv) || filemtime($file_csv)+self::CACHE_LIFE_TIME < $now) {
-
+        if (!file_exists($file_csv) || filemtime($file_csv) + self::CACHE_LIFE_TIME < $now) {
             $file = $this->getOriginDb($output, $now);
             $output->writeln('Start assembling database');
 
@@ -73,7 +71,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
     }
 
     /**
-     * Get original db file
+     * Get original db file.
      *
      * Download the original db if need and cache it in a system temp dir
      *
@@ -81,7 +79,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
      * @throws \RuntimeException
      *
      * @param OutputInterface $output
-     * @param integer $now
+     * @param int $now
      *
      * @return string
      */
@@ -95,7 +93,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
 
         $file = sys_get_temp_dir().'/'.pathinfo($path, PATHINFO_BASENAME);
 
-        if (!file_exists($file) || filemtime($file)+self::CACHE_LIFE_TIME < $now) {
+        if (!file_exists($file) || filemtime($file) + self::CACHE_LIFE_TIME < $now) {
             /* @var $downloader \AnimeDb\Bundle\AppBundle\Service\Downloader */
             $downloader = $this->getContainer()->get('anime_db.downloader');
             if (!$downloader->download($url, $file)) {
@@ -116,6 +114,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
     {
         $title = mb_strtolower($title, 'utf8');
         $title = preg_replace('/\W+/u', ' ', $title);
+
         return trim($title);
     }
 }

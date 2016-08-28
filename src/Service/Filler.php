@@ -1,13 +1,11 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Filler\Filler as FillerPlugin;
@@ -36,7 +34,7 @@ class Filler extends FillerPlugin
     const TITLE = 'AniDB.net';
 
     /**
-     * RegExp for get item id
+     * RegExp for get item id.
      *
      * @var string
      */
@@ -63,7 +61,7 @@ class Filler extends FillerPlugin
     protected $locale;
 
     /**
-     * AniDB category to genre
+     * AniDB category to genre.
      *
      * <code>
      *     { from: to, ... }
@@ -177,14 +175,16 @@ class Filler extends FillerPlugin
     /**
      * @return string
      */
-    public function getName() {
+    public function getName()
+    {
         return self::NAME;
     }
 
     /**
      * @return string
      */
-    public function getTitle() {
+    public function getTitle()
+    {
         return self::TITLE;
     }
 
@@ -197,7 +197,7 @@ class Filler extends FillerPlugin
     }
 
     /**
-     * Build menu for plugin
+     * Build menu for plugin.
      *
      * @param ItemInterface $item
      *
@@ -210,7 +210,7 @@ class Filler extends FillerPlugin
     }
 
     /**
-     * Fill item from source
+     * Fill item from source.
      *
      * @param array $data
      *
@@ -222,7 +222,7 @@ class Filler extends FillerPlugin
             strpos($data['url'], $this->browser->getHost()) !== 0 ||
             !preg_match(self::REG_ITEM_ID, $data['url'], $match)
         ) {
-            return null;
+            return;
         }
         $body = $this->browser->get('anime', ['aid' => $match['id']]);
 
@@ -250,6 +250,7 @@ class Filler extends FillerPlugin
         $this->setEpisodes($item, $body);
         $this->setType($item, $body);
         $this->setGenres($item, $body);
+
         return $item;
     }
 
@@ -318,6 +319,7 @@ class Filler extends FillerPlugin
                 // error while retrieving images is not critical
             }
         }
+
         return $item;
     }
 
@@ -335,6 +337,7 @@ class Filler extends FillerPlugin
             $episodes .= $episode->filter('epno')->text().'. '.$this->getEpisodeTitle($episode)."\n";
         }
         $item->setEpisodes(trim($episodes));
+
         return $item;
     }
 
@@ -380,6 +383,7 @@ class Filler extends FillerPlugin
         ];
         $type = $body->filter('anime > type')->text();
         $type = isset($rename[$type]) ? $rename[$type] : $type;
+
         return $item->setType(
             $this
                 ->doctrine
@@ -408,6 +412,7 @@ class Filler extends FillerPlugin
                 $item->addGenre($genre);
             }
         }
+
         return $item;
     }
 
@@ -415,9 +420,10 @@ class Filler extends FillerPlugin
      * @param string $url
      * @param EntityInterface $entity
      *
-     * @return boolean
+     * @return bool
      */
-    protected function uploadImageFromUrl($url, EntityInterface $entity) {
+    protected function uploadImageFromUrl($url, EntityInterface $entity)
+    {
         return $this->downloader->image($url, $this->downloader->getRoot().$entity->getWebPath());
     }
 
@@ -427,7 +433,7 @@ class Filler extends FillerPlugin
      *
      * @return string
      */
-    protected function getNameForLocale($locale, & $names)
+    protected function getNameForLocale($locale, &$names)
     {
         if (isset($names[$locale]['main'])) {
             $name = $names[$locale]['main'];
@@ -438,13 +444,14 @@ class Filler extends FillerPlugin
         } else {
             $name = array_shift($names[$locale]);
         }
+
         return $name;
     }
 
     /**
      * @param string $url
      *
-     * @return boolean
+     * @return bool
      */
     public function isSupportedUrl($url)
     {
