@@ -224,7 +224,7 @@ class Filler extends FillerPlugin
         ) {
             return;
         }
-        $body = $this->browser->get('anime', ['aid' => $match['id']]);
+        $body = $this->browser->getCrawler('anime', ['aid' => $match['id']]);
 
         $item = new Item();
         $item->setEpisodesNumber($body->filter('episodecount')->text());
