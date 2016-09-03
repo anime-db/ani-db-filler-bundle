@@ -6,3 +6,4 @@ enabled:
 disabled:
   - phpdoc_align
   - simplified_null_return
+  - phpdoc_no_empty_return

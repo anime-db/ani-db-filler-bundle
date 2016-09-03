@@ -70,8 +70,6 @@ class UpdateTitlesCommand extends ContainerAwareCommand
         } else {
             $output->writeln('Update is not needed');
         }
-
-        return null;
     }
 
     /**
