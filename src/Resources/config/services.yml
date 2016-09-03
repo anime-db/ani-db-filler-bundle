@@ -1,7 +1,7 @@
 services:
     anime_db.ani_db.search:
         class: AnimeDb\Bundle\AniDbFillerBundle\Service\Search
-        arguments: [ @anime_db.ani_db.browser, %anime_db.ani_db.titles_db%, %kernel.cache_dir%, %locale% ]
+        arguments: [ '@anime_db.ani_db.browser', '%anime_db.ani_db.titles_db%', '%kernel.cache_dir%', '%locale%' ]
         tags:
             - { name: anime_db.search }
         calls:
@@ -10,7 +10,12 @@ services:
 
     anime_db.ani_db.filler:
         class: AnimeDb\Bundle\AniDbFillerBundle\Service\Filler
-        arguments: [ @anime_db.ani_db.browser, @doctrine, @anime_db.downloader, %locale% ]
+        arguments:
+            - '@anime_db.ani_db.browser'
+            - '@doctrine'
+            - '@anime_db.downloader'
+            - '@anime_db.ani_db.summary_cleaner'
+            - '%locale%'
         tags:
             - { name: anime_db.filler }
         calls:
@@ -18,22 +23,30 @@ services:
 
     anime_db.ani_db.refiller:
         class: AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller
-        arguments: [ @anime_db.ani_db.browser, @anime_db.ani_db.filler, @anime_db.ani_db.search ]
+        arguments:
+            - '@anime_db.ani_db.browser'
+            - '@anime_db.ani_db.filler'
+            - '@anime_db.ani_db.search'
         tags:
             - { name: anime_db.refiller }
 
     anime_db.ani_db.listener.console:
         class: AnimeDb\Bundle\AniDbFillerBundle\Event\Listener\Console
-        arguments: [ %kernel.root_dir% ]
+        arguments: [ '%kernel.root_dir%' ]
         tags:
             - { name: kernel.event_listener, event: console.terminate, method: onTerminate }
 
     anime_db.ani_db.listener.refiller:
         class: AnimeDb\Bundle\AniDbFillerBundle\Event\Listener\Refiller
         arguments:
-            - @event_dispatcher
-            - @anime_db.ani_db.refiller
-            - @anime_db.ani_db.filler
-            - @anime_db.ani_db.browser
+            - '@event_dispatcher'
+            - '@anime_db.ani_db.refiller'
+            - '@anime_db.ani_db.filler'
+            - '@anime_db.ani_db.browser'
+            - '@anime_db.ani_db.summary_cleaner'
         tags:
             - { name: kernel.event_listener, event: anime_db.storage.add_new_item, method: onAddNewItem }
+
+    anime_db.ani_db.summary_cleaner:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Service\SummaryCleaner
+        arguments: [ '@anime_db.ani_db.browser' ]

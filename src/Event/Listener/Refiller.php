@@ -1,15 +1,14 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Event\Listener;
 
+use AnimeDb\Bundle\AniDbFillerBundle\Service\SummaryCleaner;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller as RefillerService;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Filler;
@@ -20,65 +19,58 @@ use AnimeDb\Bundle\CatalogBundle\Entity\Item;
 use AnimeDb\Bundle\CatalogBundle\Entity\Name;
 
 /**
- * Refiller for new item
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Event\Listener
- * @author  Peter Gribanov <info@peter-gribanov.ru>
+ * Refiller for new item.
  */
 class Refiller
 {
     /**
-     * Refiller
-     *
-     * @var \AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller
+     * @var RefillerService
      */
     protected $refiller;
 
     /**
-     * Filler
-     *
-     * @var \AnimeDb\Bundle\AniDbFillerBundle\Service\Filler
+     * @var Filler
      */
     protected $filler;
 
     /**
-     * Browser
-     *
-     * @var \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser
+     * @var Browser
      */
-    private $browser;
+    protected $browser;
 
     /**
-     * Dispatcher
-     *
-     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     * @var EventDispatcherInterface
      */
     protected $dispatcher;
 
     /**
-     * Construct
-     *
-     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
-     * @param \AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller $refiller
-     * @param \AnimeDb\Bundle\AniDbFillerBundle\Service\Filler $filler
-     * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
+     * @var SummaryCleaner
+     */
+    protected $cleaner;
+
+    /**
+     * @param EventDispatcherInterface $dispatcher
+     * @param RefillerService $refiller
+     * @param Filler $filler
+     * @param Browser $browser
+     * @param SummaryCleaner $cleaner
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
         RefillerService $refiller,
         Filler $filler,
-        Browser $browser
+        Browser $browser,
+        SummaryCleaner $cleaner
     ) {
         $this->dispatcher = $dispatcher;
         $this->refiller = $refiller;
         $this->filler = $filler;
         $this->browser = $browser;
+        $this->cleaner = $cleaner;
     }
 
     /**
-     * On add new item
-     *
-     * @param \AnimeDb\Bundle\CatalogBundle\Event\Storage\AddNewItem $event
+     * @param AddNewItem $event
      */
     public function onAddNewItem(AddNewItem $event)
     {
@@ -108,8 +100,7 @@ class Refiller
                 $item->setEpisodesNumber($body->filter('episodecount')->text());
             }
             if (!$item->getSummary()) {
-                $reg = '#'.preg_quote($this->browser->getHost()).'/ch\d+ \[([^\]]+)\]#';
-                $item->setSummary(preg_replace($reg, '$1', $body->filter('description')->text()));
+                $item->setSummary($this->cleaner->clean($body->filter('description')->text()));
             }
             if (!$item->getType()) {
                 $this->filler->setType($item, $body);
@@ -124,7 +115,7 @@ class Refiller
             // set main name in top of names list
             $new_names = $new_item->getNames()->toArray();
             array_unshift($new_names, (new Name())->setName($new_item->getName()));
-            /* @var $new_name \AnimeDb\Bundle\CatalogBundle\Entity\Name */
+            /* @var $new_name Name */
             foreach ($new_names as $new_name) {
                 $item->addName($new_name->setItem(null));
             }

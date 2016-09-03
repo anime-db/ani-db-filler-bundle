@@ -1,13 +1,11 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Event\Listener;
 
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
@@ -15,23 +13,16 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
- * Update the titles db on clear cache
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Event\Listener
- * @author  Peter Gribanov <info@peter-gribanov.ru>
+ * Update the titles db on clear cache.
  */
 class Console
 {
     /**
-     * Root dir
-     *
      * @var string
      */
     protected $root_dir;
 
     /**
-     * Construct
-     *
      * @param string $root_dir
      */
     public function __construct($root_dir)
@@ -40,9 +31,7 @@ class Console
     }
 
     /**
-     * On Terminate command
-     *
-     * @param \Symfony\Component\Console\Event\ConsoleTerminateEvent $event
+     * @param ConsoleTerminateEvent $event
      */
     public function onTerminate(ConsoleTerminateEvent $event)
     {
@@ -52,7 +41,9 @@ class Console
 
             $phpFinder = new PhpExecutableFinder();
             if (!($phpPath = $phpFinder->find())) {
-                throw new \RuntimeException('The php executable could not be found, add it to your PATH environment variable and try again');
+                throw new \RuntimeException(
+                    'The php executable could not be found, add it to your PATH environment variable and try again'
+                );
             }
 
             $php = escapeshellarg($phpPath);

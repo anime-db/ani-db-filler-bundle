@@ -1,13 +1,11 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Filler\Filler as FillerPlugin;
@@ -23,66 +21,52 @@ use Symfony\Component\DomCrawler\Crawler;
 use Knp\Menu\ItemInterface;
 use AnimeDb\Bundle\AppBundle\Service\Downloader\Entity\EntityInterface;
 
-/**
- * Search from site AniDB.net
- * 
- * @link http://anidb.net/
- * @package AnimeDb\Bundle\AniDbFillerBundle\Service
- * @author  Peter Gribanov <info@peter-gribanov.ru>
- */
 class Filler extends FillerPlugin
 {
     /**
-     * Name
-     *
      * @var string
      */
     const NAME = 'anidb';
 
     /**
-     * Title
-     *
      * @var string
      */
     const TITLE = 'AniDB.net';
 
     /**
-     * RegExp for get item id
+     * RegExp for get item id.
      *
      * @var string
      */
     const REG_ITEM_ID = '#/perl\-bin/animedb\.pl\?show=anime&aid=(?<id>\d+)#';
 
     /**
-     * Browser
-     *
-     * @var \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser
+     * @var Browser
      */
-    private $browser;
+    protected $browser;
 
     /**
-     * Doctrine
-     *
-     * @var \Doctrine\Bundle\DoctrineBundle\Registry
+     * @var Registry
      */
-    private $doctrine;
+    protected $doctrine;
 
     /**
-     * Downloader
-     *
-     * @var \AnimeDb\Bundle\AppBundle\Service\Downloader
+     * @var Downloader
      */
-    private $downloader;
+    protected $downloader;
 
     /**
-     * Locale
-     *
+     * @var SummaryCleaner
+     */
+    protected $cleaner;
+
+    /**
      * @var string
      */
     protected $locale;
 
     /**
-     * AniDB category to genre
+     * AniDB category to genre.
      *
      * <code>
      *     { from: to, ... }
@@ -176,47 +160,44 @@ class Filler extends FillerPlugin
     ];
 
     /**
-     * Construct
-     *
-     * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
-     * @param \Doctrine\Bundle\DoctrineBundle\Registry $doctrine
-     * @param \AnimeDb\Bundle\AppBundle\Service\Downloader $downloader
-     * @param string $locale
+     * @param Browser $browser
+     * @param Registry $doctrine
+     * @param Downloader $downloader
+     * @param SummaryCleaner $cleaner
+     * @param $locale
      */
     public function __construct(
         Browser $browser,
         Registry $doctrine,
         Downloader $downloader,
+        SummaryCleaner $cleaner,
         $locale
     ) {
         $this->browser = $browser;
         $this->doctrine = $doctrine;
         $this->downloader = $downloader;
+        $this->cleaner = $cleaner;
         $this->locale = $locale;
     }
 
     /**
-     * Get name
-     *
      * @return string
      */
-    public function getName() {
+    public function getName()
+    {
         return self::NAME;
     }
 
     /**
-     * Get title
-     *
      * @return string
      */
-    public function getTitle() {
+    public function getTitle()
+    {
         return self::TITLE;
     }
 
     /**
-     * Get form
-     *
-     * @return \AnimeDb\Bundle\AniDbFillerBundle\Form\Type\Filler
+     * @return FillerForm
      */
     public function getForm()
     {
@@ -224,11 +205,11 @@ class Filler extends FillerPlugin
     }
 
     /**
-     * Build menu for plugin
+     * Build menu for plugin.
      *
-     * @param \Knp\Menu\ItemInterface $item
+     * @param ItemInterface $item
      *
-     * @return \Knp\Menu\ItemInterface
+     * @return ItemInterface
      */
     public function buildMenu(ItemInterface $item)
     {
@@ -237,11 +218,11 @@ class Filler extends FillerPlugin
     }
 
     /**
-     * Fill item from source
+     * Fill item from source.
      *
      * @param array $data
      *
-     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item|null
+     * @return Item|null
      */
     public function fill(array $data)
     {
@@ -251,15 +232,14 @@ class Filler extends FillerPlugin
         ) {
             return null;
         }
+
         $body = $this->browser->get('anime', ['aid' => $match['id']]);
 
         $item = new Item();
         $item->setEpisodesNumber($body->filter('episodecount')->text());
         $item->setDatePremiere(new \DateTime($body->filter('startdate')->text()));
         $item->setDateEnd(new \DateTime($body->filter('enddate')->text()));
-        // remove links in summary
-        $reg = '#'.preg_quote($this->browser->getHost()).'/ch\d+ \[([^\]]+)\]#';
-        $item->setSummary(preg_replace($reg, '$1', $body->filter('description')->text()));
+        $item->setSummary($this->cleaner->clean($body->filter('description')->text()));
 
         // set main source
         $source = new Source();
@@ -277,16 +257,15 @@ class Filler extends FillerPlugin
         $this->setEpisodes($item, $body);
         $this->setType($item, $body);
         $this->setGenres($item, $body);
+
         return $item;
     }
 
     /**
-     * Set item names
+     * @param Item $item
+     * @param Crawler $body
      *
-     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
-     * @param \Symfony\Component\DomCrawler\Crawler $body
-     *
-     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
+     * @return Item
      */
     public function setNames(Item $item, Crawler $body)
     {
@@ -327,13 +306,11 @@ class Filler extends FillerPlugin
     }
 
     /**
-     * Set item cover
+     * @param Item $item
+     * @param Crawler $body
+     * @param string $id
      *
-     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
-     * @param \Symfony\Component\DomCrawler\Crawler $body
-     * @param integer $id
-     *
-     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
+     * @return Item
      */
     public function setCover(Item $item, Crawler $body, $id)
     {
@@ -343,20 +320,21 @@ class Filler extends FillerPlugin
                 if ($path = parse_url($image, PHP_URL_PATH)) {
                     $ext = pathinfo($path, PATHINFO_EXTENSION);
                     $item->setCover(self::NAME.'/'.$id.'/cover.'.$ext);
-                    $this->uploadImage($image, $item);
+                    $this->uploadImageFromUrl($image, $item);
                 }
-            } catch (\Exception $e) {} // error while retrieving images is not critical
+            } catch (\Exception $e) {
+                // error while retrieving images is not critical
+            }
         }
+
         return $item;
     }
 
     /**
-     * Set item episodes
+     * @param Item $item
+     * @param Crawler $body
      *
-     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
-     * @param \Symfony\Component\DomCrawler\Crawler $body
-     *
-     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
+     * @return Item
      */
     public function setEpisodes(Item $item, Crawler $body)
     {
@@ -366,13 +344,12 @@ class Filler extends FillerPlugin
             $episodes .= $episode->filter('epno')->text().'. '.$this->getEpisodeTitle($episode)."\n";
         }
         $item->setEpisodes(trim($episodes));
+
         return $item;
     }
 
     /**
-     * Get episode title
-     *
-     * @param \Symfony\Component\DomCrawler\Crawler $episode
+     * @param Crawler $episode
      *
      * @return string
      */
@@ -399,12 +376,10 @@ class Filler extends FillerPlugin
     }
 
     /**
-     * Set item type
+     * @param Item $item
+     * @param Crawler $body
      *
-     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
-     * @param \Symfony\Component\DomCrawler\Crawler $body
-     *
-     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
+     * @return Item
      */
     public function setType(Item $item, Crawler $body)
     {
@@ -415,16 +390,20 @@ class Filler extends FillerPlugin
         ];
         $type = $body->filter('anime > type')->text();
         $type = isset($rename[$type]) ? $rename[$type] : $type;
-        return $item->setType($this->doctrine->getRepository('AnimeDbCatalogBundle:Type')->findOneBy(['name' => $type]));
+
+        return $item->setType(
+            $this
+                ->doctrine
+                ->getRepository('AnimeDbCatalogBundle:Type')
+                ->findOneBy(['name' => $type])
+        );
     }
 
     /**
-     * Set item genres
+     * @param Item $item
+     * @param Crawler $body
      *
-     * @param \AnimeDb\Bundle\CatalogBundle\Entity\Item $item
-     * @param \Symfony\Component\DomCrawler\Crawler $body
-     *
-     * @return \AnimeDb\Bundle\CatalogBundle\Entity\Item
+     * @return Item
      */
     public function setGenres(Item $item, Crawler $body)
     {
@@ -440,29 +419,28 @@ class Filler extends FillerPlugin
                 $item->addGenre($genre);
             }
         }
+
         return $item;
     }
 
     /**
-     * Upload image from url
-     *
      * @param string $url
-     * @param \AnimeDb\Bundle\AppBundle\Service\Downloader\Entity\EntityInterface $entity
+     * @param EntityInterface $entity
      *
-     * @return boolean
+     * @return bool
      */
-    protected function uploadImage($url, EntityInterface $entity) {
+    protected function uploadImageFromUrl($url, EntityInterface $entity)
+    {
         return $this->downloader->image($url, $this->downloader->getRoot().$entity->getWebPath());
     }
 
     /**
-     * Get name for locale
-     *
      * @param string $locale
      * @param array $names
+     *
      * @return string
      */
-    protected function getNameForLocale($locale, & $names)
+    protected function getNameForLocale($locale, &$names)
     {
         if (isset($names[$locale]['main'])) {
             $name = $names[$locale]['main'];
@@ -473,15 +451,14 @@ class Filler extends FillerPlugin
         } else {
             $name = array_shift($names[$locale]);
         }
+
         return $name;
     }
 
     /**
-     * Is supported URL
-     *
      * @param string $url
      *
-     * @return boolean
+     * @return bool
      */
     public function isSupportedUrl($url)
     {

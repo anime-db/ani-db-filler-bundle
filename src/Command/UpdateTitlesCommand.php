@@ -1,13 +1,11 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -15,24 +13,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Update list of titles from AniDB.net
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Command
- * @author  Peter Gribanov <info@peter-gribanov.ru>
+ * Update list of titles from AniDB.net.
  */
 class UpdateTitlesCommand extends ContainerAwareCommand
 {
     /**
-     * Cache life time
-     *
-     * @var integer
+     * @var int
      */
     const CACHE_LIFE_TIME = 86400;
 
-    /**
-     * (non-PHPdoc)
-     * @see Symfony\Component\Console\Command.Command::configure()
-     */
     protected function configure()
     {
         $this->setName('animedb:update-titles')
@@ -40,16 +29,18 @@ class UpdateTitlesCommand extends ContainerAwareCommand
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Symfony\Component\Console\Command.Command::execute()
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     *
+     * @return null
      */
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $now = time();
         $file_csv = $this->getContainer()->getParameter('kernel.cache_dir').'/'.
             $this->getContainer()->getParameter('anime_db.ani_db.titles_db');
 
-        if (!file_exists($file_csv) || filemtime($file_csv)+self::CACHE_LIFE_TIME < $now) {
-
+        if (!file_exists($file_csv) || filemtime($file_csv) + self::CACHE_LIFE_TIME < $now) {
             $file = $this->getOriginDb($output, $now);
             $output->writeln('Start assembling database');
 
@@ -82,15 +73,15 @@ class UpdateTitlesCommand extends ContainerAwareCommand
     }
 
     /**
-     * Get original db file
+     * Get original db file.
      *
      * Download the original db if need and cache it in a system temp dir
      *
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
-     * @param integer $now
+     * @param OutputInterface $output
+     * @param int $now
      *
      * @return string
      */
@@ -104,7 +95,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
 
         $file = sys_get_temp_dir().'/'.pathinfo($path, PATHINFO_BASENAME);
 
-        if (!file_exists($file) || filemtime($file)+self::CACHE_LIFE_TIME < $now) {
+        if (!file_exists($file) || filemtime($file) + self::CACHE_LIFE_TIME < $now) {
             /* @var $downloader \AnimeDb\Bundle\AppBundle\Service\Downloader */
             $downloader = $this->getContainer()->get('anime_db.downloader');
             if (!$downloader->download($url, $file)) {
@@ -117,15 +108,15 @@ class UpdateTitlesCommand extends ContainerAwareCommand
     }
 
     /**
-     * Get unified title
-     *
      * @param string $title
+     *
      * @return string
      */
     protected function getUnifiedTitle($title)
     {
         $title = mb_strtolower($title, 'utf8');
         $title = preg_replace('/\W+/u', ' ', $title);
+
         return trim($title);
     }
 }

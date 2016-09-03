@@ -1,36 +1,30 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Get item from filler
- *
- * @package AnimeDb\Bundle\AniDbFillerBundle\Form\Type
- * @author  Peter Gribanov <info@peter-gribanov.ru>
+ * Get item from filler.
  */
 class Filler extends AbstractType
 {
     /**
-     * HTTP host
+     * HTTP host.
      *
      * @var string
      */
     protected $host;
 
     /**
-     * Construct
-     *
      * @param string $host
      */
     public function __construct($host)
@@ -39,8 +33,8 @@ class Filler extends AbstractType
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Symfony\Component\Form\AbstractType::buildForm()
+     * @param FormBuilderInterface $builder
+     * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -55,8 +49,17 @@ class Filler extends AbstractType
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Symfony\Component\Form\FormTypeInterface::getName()
+     * @param OptionsResolver $resolver
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'csrf_protection' => false,
+        ]);
+    }
+
+    /**
+     * @return string
      */
     public function getName()
     {

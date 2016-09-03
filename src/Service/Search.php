@@ -1,13 +1,11 @@
 <?php
 /**
- * AnimeDb package
+ * AnimeDb package.
  *
- * @package   AnimeDb
  * @author    Peter Gribanov <info@peter-gribanov.ru>
  * @copyright Copyright (c) 2011, Peter Gribanov
  * @license   http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-
 namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Search\Search as SearchPlugin;
@@ -16,94 +14,75 @@ use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
 use Knp\Menu\ItemInterface;
 
 /**
- * Search from site AniDB.net
- * 
- * @link http://anidb.net/
- * @package AnimeDb\Bundle\AniDbFillerBundle\Service
- * @author  Peter Gribanov <info@peter-gribanov.ru>
+ * Search from site AniDB.net.
  */
 class Search extends SearchPlugin
 {
     /**
-     * Name
-     *
      * @var string
      */
     const NAME = 'anidb';
 
     /**
-     * Title
-     *
      * @var string
      */
     const TITLE = 'AniDB.net';
 
     /**
-     * Item link
-     *
      * @var string
      */
     const ITEM_LINK = '/perl-bin/animedb.pl?show=anime&aid=#ID#';
 
     /**
-     * Browser
-     *
-     * @var \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser
+     * @var Browser
      */
     protected $browser;
 
     /**
-     * Titeles DB
-     *
      * @var string
      */
     protected $titles_db;
 
     /**
-     * Locale
-     *
      * @var string
      */
     protected $locale;
 
     /**
-     * Construct
-     *
-     * @param \AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser $browser
+     * @param Browser $browser
      * @param string $titles_db
      * @param string $cache_dir
      * @param string $locale
      */
-    public function __construct(Browser $browser, $titles_db, $cache_dir, $locale) {
+    public function __construct(Browser $browser, $titles_db, $cache_dir, $locale)
+    {
         $this->browser = $browser;
         $this->locale = $locale;
         $this->titles_db = $cache_dir.'/'.$titles_db;
     }
 
     /**
-     * Get name
-     *
      * @return string
      */
-    public function getName() {
+    public function getName()
+    {
         return self::NAME;
     }
 
     /**
-     * Get title
-     *
      * @return string
      */
-    public function getTitle() {
+    public function getTitle()
+    {
         return self::TITLE;
     }
 
     /**
-     * Build menu for plugin
+     * Build menu for plugin.
      *
-     * @param \Knp\Menu\ItemInterface $item
+     * @param ItemInterface $item
      *
-     * @return \Knp\Menu\ItemInterface
+     * @return ItemInterface
      */
     public function buildMenu(ItemInterface $item)
     {
@@ -112,18 +91,11 @@ class Search extends SearchPlugin
     }
 
     /**
-     * Search source by name
-     *
-     * Return structure
-     * <code>
-     * [
-     *     \AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Search\Item
-     * ]
-     * </code>
+     * Search source by name.
      *
      * @param array $data
      *
-     * @return array
+     * @return ItemSearch[]
      */
     public function search(array $data)
     {
@@ -139,7 +111,7 @@ class Search extends SearchPlugin
         $fp = gzopen($this->titles_db, 'r');
         while (!gzeof($fp)) {
             $line = trim(gzgets($fp, 4096));
-            list($aid, $type, $lang, $unified, ) = explode('|', $line);
+            list($aid, $type, $lang, $unified) = explode('|', $line);
             if (mb_strpos($unified, $search, 0, 'utf8') === 0) {
                 if ($type == 1 || ($type == 4 && $lang == $this->locale) || empty($titles[$aid])) {
                     $aids[] = $aid;
@@ -190,26 +162,25 @@ class Search extends SearchPlugin
     }
 
     /**
-     * Get unified title
-     *
      * @param string $title
+     *
      * @return string
      */
     protected function getUnifiedTitle($title)
     {
         $title = mb_strtolower($title, 'utf8');
         $title = preg_replace('/\W+/u', ' ', $title);
+
         return trim($title);
     }
 
     /**
-     * Get name for locale
-     *
      * @param string $locale
      * @param array $names
+     *
      * @return string
      */
-    protected function getNameForLocale($locale, & $names)
+    protected function getNameForLocale($locale, &$names)
     {
         if (isset($names[$locale][1])) {
             $name = $names[$locale][1];
@@ -220,6 +191,7 @@ class Search extends SearchPlugin
         } else {
             $name = array_shift($names[$locale]);
         }
+
         return $name;
     }
 }
