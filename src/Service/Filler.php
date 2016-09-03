@@ -222,9 +222,10 @@ class Filler extends FillerPlugin
             strpos($data['url'], $this->browser->getHost()) !== 0 ||
             !preg_match(self::REG_ITEM_ID, $data['url'], $match)
         ) {
-            return;
+            return null;
         }
-        $body = $this->browser->getCrawler('anime', ['aid' => $match['id']]);
+
+        $body = $this->browser->get('anime', ['aid' => $match['id']]);
 
         $item = new Item();
         $item->setEpisodesNumber($body->filter('episodecount')->text());

@@ -117,7 +117,7 @@ class Refiller implements RefillerInterface
         }
 
         // get data
-        $body = $this->browser->getCrawler('anime', ['aid' => $match['id']]);
+        $body = $this->browser->get('anime', ['aid' => $match['id']]);
 
         switch ($field) {
             case self::FIELD_DATE_END:

@@ -3,4 +3,4 @@ assetic:
     assets:
         stylesheets:
             inputs:
-                - @AnimeDbAniDbFillerBundle/Resources/public/css/plugin.css
+                - '@AnimeDbAniDbFillerBundle/Resources/public/css/plugin.css'

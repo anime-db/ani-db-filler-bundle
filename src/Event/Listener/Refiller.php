@@ -72,7 +72,7 @@ class Refiller
         ) {
             try {
                 // get data
-                $body = $this->browser->getCrawler('anime', ['aid' => $match['id']]);
+                $body = $this->browser->get('anime', ['aid' => $match['id']]);
             } catch (\Exception $e) {
                 return;
             }
