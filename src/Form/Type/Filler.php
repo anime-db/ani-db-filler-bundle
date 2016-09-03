@@ -10,6 +10,7 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Get item from filler.
@@ -45,6 +46,16 @@ class Filler extends AbstractType
                     'placeholder' => $this->host.'/',
                 ],
             ]);
+    }
+
+    /**
+     * @param OptionsResolver $resolver
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'csrf_protection' => false
+        ]);
     }
 
     /**
