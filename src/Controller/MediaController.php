@@ -31,8 +31,7 @@ class MediaController extends Controller
      */
     public function coverAction($id, Request $request)
     {
-        /* @var $body Crawler */
-        $body = $this->get('anime_db.ani_db.browser')->get('anime', ['aid' => $id]);
+        $body = $this->getAnime($id);
         /* @var $response Response */
         $response = $this->get('cache_time_keeper')->getResponse([], self::CACHE_LIFETIME)
             ->setEtag(sha1($body->html()));
@@ -55,5 +54,15 @@ class MediaController extends Controller
         }
 
         return $response;
+    }
+
+    /**
+     * @param int $aid
+     *
+     * @return Crawler
+     */
+    private function getAnime($aid)
+    {
+        return $this->get('anime_db.ani_db.browser')->get('anime', ['aid' => $aid]);
     }
 }

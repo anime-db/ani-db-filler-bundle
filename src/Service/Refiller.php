@@ -8,11 +8,9 @@
  */
 namespace AnimeDb\Bundle\AniDbFillerBundle\Service;
 
-use AnimeDb\Bundle\CatalogBundle\Entity\Genre;
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Refiller\RefillerInterface;
 use AnimeDb\Bundle\AniDbBrowserBundle\Service\Browser;
 use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Refiller\Item as ItemRefiller;
-use AnimeDb\Bundle\CatalogBundle\Plugin\Fill\Search\Item as ItemSearch;
 use AnimeDb\Bundle\CatalogBundle\Entity\Item;
 use AnimeDb\Bundle\CatalogBundle\Entity\Source;
 use AnimeDb\Bundle\CatalogBundle\Entity\Name;
@@ -141,7 +139,6 @@ class Refiller implements RefillerInterface
                 break;
             case self::FIELD_GENRES:
                 $new_item = $this->filler->setGenres(new Item(), $body);
-                /* @var $new_genre Genre */
                 foreach ($new_item->getGenres() as $new_genre) {
                     $item->addGenre($new_genre);
                 }
@@ -229,7 +226,6 @@ class Refiller implements RefillerInterface
         // do search
         if ($name) {
             $result = $this->search->search(['name' => $name]);
-            /* @var $item ItemSearch */
             foreach ($result as $key => $item) {
                 // get real url from search result
                 if ($query = parse_url($item->getLink(), PHP_URL_QUERY)) {
