@@ -61,15 +61,22 @@ class Refiller implements RefillerInterface
     protected $search;
 
     /**
+     * @var SummaryCleaner
+     */
+    protected $cleaner;
+
+    /**
      * @param Browser $browser
      * @param Filler $filler
      * @param Search $search
+     * @param SummaryCleaner $cleaner
      */
-    public function __construct(Browser $browser, Filler $filler, Search $search)
+    public function __construct(Browser $browser, Filler $filler, Search $search, SummaryCleaner $cleaner)
     {
         $this->browser = $browser;
         $this->filler = $filler;
         $this->search = $search;
+        $this->cleaner = $cleaner;
     }
 
     /**
@@ -154,8 +161,7 @@ class Refiller implements RefillerInterface
                 }
                 break;
             case self::FIELD_SUMMARY:
-                $reg = '#'.preg_quote($this->browser->getHost()).'/ch\d+ \[([^\]]+)\]#';
-                $item->setSummary(preg_replace($reg, '$1', $body->filter('description')->text()));
+                $item->setSummary($this->cleaner->clean($body->filter('description')->text()));
                 break;
         }
 

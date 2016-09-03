@@ -43,17 +43,22 @@ class Filler extends FillerPlugin
     /**
      * @var Browser
      */
-    private $browser;
+    protected $browser;
 
     /**
      * @var Registry
      */
-    private $doctrine;
+    protected $doctrine;
 
     /**
      * @var Downloader
      */
-    private $downloader;
+    protected $downloader;
+
+    /**
+     * @var SummaryCleaner
+     */
+    protected $cleaner;
 
     /**
      * @var string
@@ -158,17 +163,20 @@ class Filler extends FillerPlugin
      * @param Browser $browser
      * @param Registry $doctrine
      * @param Downloader $downloader
+     * @param SummaryCleaner $cleaner
      * @param $locale
      */
     public function __construct(
         Browser $browser,
         Registry $doctrine,
         Downloader $downloader,
+        SummaryCleaner $cleaner,
         $locale
     ) {
         $this->browser = $browser;
         $this->doctrine = $doctrine;
         $this->downloader = $downloader;
+        $this->cleaner = $cleaner;
         $this->locale = $locale;
     }
 
@@ -231,9 +239,7 @@ class Filler extends FillerPlugin
         $item->setEpisodesNumber($body->filter('episodecount')->text());
         $item->setDatePremiere(new \DateTime($body->filter('startdate')->text()));
         $item->setDateEnd(new \DateTime($body->filter('enddate')->text()));
-        // remove links in summary
-        $reg = '#'.preg_quote($this->browser->getHost()).'/ch\d+ \[([^\]]+)\]#';
-        $item->setSummary(preg_replace($reg, '$1', $body->filter('description')->text()));
+        $item->setSummary($this->cleaner->clean($body->filter('description')->text()));
 
         // set main source
         $source = new Source();

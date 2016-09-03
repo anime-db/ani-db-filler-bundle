@@ -8,6 +8,7 @@
  */
 namespace AnimeDb\Bundle\AniDbFillerBundle\Event\Listener;
 
+use AnimeDb\Bundle\AniDbFillerBundle\Service\SummaryCleaner;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller as RefillerService;
 use AnimeDb\Bundle\AniDbFillerBundle\Service\Filler;
@@ -35,7 +36,7 @@ class Refiller
     /**
      * @var Browser
      */
-    private $browser;
+    protected $browser;
 
     /**
      * @var EventDispatcherInterface
@@ -43,21 +44,29 @@ class Refiller
     protected $dispatcher;
 
     /**
+     * @var SummaryCleaner
+     */
+    protected $cleaner;
+
+    /**
      * @param EventDispatcherInterface $dispatcher
      * @param RefillerService $refiller
      * @param Filler $filler
      * @param Browser $browser
+     * @param SummaryCleaner $cleaner
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
         RefillerService $refiller,
         Filler $filler,
-        Browser $browser
+        Browser $browser,
+        SummaryCleaner $cleaner
     ) {
         $this->dispatcher = $dispatcher;
         $this->refiller = $refiller;
         $this->filler = $filler;
         $this->browser = $browser;
+        $this->cleaner = $cleaner;
     }
 
     /**
@@ -91,8 +100,7 @@ class Refiller
                 $item->setEpisodesNumber($body->filter('episodecount')->text());
             }
             if (!$item->getSummary()) {
-                $reg = '#'.preg_quote($this->browser->getHost()).'/ch\d+ \[([^\]]+)\]#';
-                $item->setSummary(preg_replace($reg, '$1', $body->filter('description')->text()));
+                $item->setSummary($this->cleaner->clean($body->filter('description')->text()));
             }
             if (!$item->getType()) {
                 $this->filler->setType($item, $body);

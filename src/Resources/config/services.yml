@@ -10,7 +10,12 @@ services:
 
     anime_db.ani_db.filler:
         class: AnimeDb\Bundle\AniDbFillerBundle\Service\Filler
-        arguments: [ '@anime_db.ani_db.browser', '@doctrine', '@anime_db.downloader', '%locale%' ]
+        arguments:
+            - '@anime_db.ani_db.browser'
+            - '@doctrine'
+            - '@anime_db.downloader'
+            - '@anime_db.ani_db.summary_cleaner'
+            - '%locale%'
         tags:
             - { name: anime_db.filler }
         calls:
@@ -18,7 +23,10 @@ services:
 
     anime_db.ani_db.refiller:
         class: AnimeDb\Bundle\AniDbFillerBundle\Service\Refiller
-        arguments: [ '@anime_db.ani_db.browser', '@anime_db.ani_db.filler', '@anime_db.ani_db.search' ]
+        arguments:
+            - '@anime_db.ani_db.browser'
+            - '@anime_db.ani_db.filler'
+            - '@anime_db.ani_db.search'
         tags:
             - { name: anime_db.refiller }
 
@@ -35,5 +43,10 @@ services:
             - '@anime_db.ani_db.refiller'
             - '@anime_db.ani_db.filler'
             - '@anime_db.ani_db.browser'
+            - '@anime_db.ani_db.summary_cleaner'
         tags:
             - { name: kernel.event_listener, event: anime_db.storage.add_new_item, method: onAddNewItem }
+
+    anime_db.ani_db.summary_cleaner:
+        class: AnimeDb\Bundle\AniDbFillerBundle\Service\SummaryCleaner
+        arguments: [ '@anime_db.ani_db.browser' ]
