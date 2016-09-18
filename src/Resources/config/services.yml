@@ -27,6 +27,7 @@ services:
             - '@anime_db.ani_db.browser'
             - '@anime_db.ani_db.filler'
             - '@anime_db.ani_db.search'
+            - '@anime_db.ani_db.summary_cleaner'
         tags:
             - { name: anime_db.refiller }
 
