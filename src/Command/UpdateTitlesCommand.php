@@ -45,6 +45,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
                 $file = $this->getOriginDb($output, $now);
             } catch (\Exception $e) {
                 $output->writeln(sprintf('<error>Failed download origin DB: %s</error>', $e->getMessage()));
+
                 return 1;
             }
 
