@@ -11,6 +11,7 @@ namespace AnimeDb\Bundle\AniDbFillerBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Update list of titles from AniDB.net.
@@ -102,18 +103,23 @@ class UpdateTitlesCommand extends ContainerAwareCommand
             throw new \InvalidArgumentException('Failed parse URL: '.$url);
         }
 
-        $file = sys_get_temp_dir().'/'.pathinfo($path, PATHINFO_BASENAME);
+        /* @var Filesystem $fs */
+        $fs = $this->getContainer()->get('filesystem');
+        $filename = sys_get_temp_dir().'/'.pathinfo($path, PATHINFO_BASENAME);
 
-        if (!file_exists($file) || filemtime($file) + self::CACHE_LIFE_TIME < $now) {
+        if (!$fs->exists($filename) || filemtime($filename) + self::CACHE_LIFE_TIME < $now) {
             /* @var $downloader \AnimeDb\Bundle\AppBundle\Service\Downloader */
             $downloader = $this->getContainer()->get('anime_db.downloader');
-            if (!$downloader->download($url, $file)) {
+            $tmp = tempnam(sys_get_temp_dir(), 'ani_db_titles');
+            if (!$downloader->download($url, $tmp, true)) {
+                $fs->remove($tmp);
                 throw new \RuntimeException('Failed to download the titles database');
             }
+            $fs->rename($tmp, $filename, true);
             $output->writeln('The titles database is loaded');
         }
 
-        return $file;
+        return $filename;
     }
 
     /**
