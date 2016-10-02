@@ -44,7 +44,8 @@ class UpdateTitlesCommand extends ContainerAwareCommand
             try {
                 $file = $this->getOriginDb($output, $now);
             } catch (\Exception $e) {
-                $output->writeln(sprintf('<error>Failed download origin DB: %s</error>', $e->getMessage()));
+                $output->writeln('AniDB list titles is not downloaded');
+                $output->writeln($e->getMessage());
 
                 return 1;
             }
