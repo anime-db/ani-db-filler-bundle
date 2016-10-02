@@ -32,7 +32,7 @@ class UpdateTitlesCommand extends ContainerAwareCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      *
-     * @return null
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -41,7 +41,13 @@ class UpdateTitlesCommand extends ContainerAwareCommand
             $this->getContainer()->getParameter('anime_db.ani_db.titles_db');
 
         if (!file_exists($file_csv) || filemtime($file_csv) + self::CACHE_LIFE_TIME < $now) {
-            $file = $this->getOriginDb($output, $now);
+            try {
+                $file = $this->getOriginDb($output, $now);
+            } catch (\Exception $e) {
+                $output->writeln(sprintf('<error>Failed download origin DB: %s</error>', $e->getMessage()));
+                return 1;
+            }
+
             $output->writeln('Start assembling database');
 
             // clear list titles and add unified title
@@ -70,6 +76,8 @@ class UpdateTitlesCommand extends ContainerAwareCommand
         } else {
             $output->writeln('Update is not needed');
         }
+
+        return 0;
     }
 
     /**
